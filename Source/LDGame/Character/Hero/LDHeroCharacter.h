@@ -31,8 +31,10 @@ protected:
 	void InputAbilityInputTagReleased(FGameplayTag InputTag);
 
 	void OnPlayerMove(const FInputActionValue& InputValue);
+	void OnPlayerSelect(const FInputActionValue& InputValue);
 	void OnPlayerSpin(const FInputActionValue& Value);
 	void OnPlayerZoom(const FInputActionValue& InputValue);
+	void OnPlayerDragMove(const FInputActionValue& InputValue);
 
 	void UpdatePlayerViewZoom();
 	
@@ -49,9 +51,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LDGame|Zoom")
 	float ZoomValue;
-	
+
 private:
-	/** Top down camera */
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* TopDownCameraComponent;
 
