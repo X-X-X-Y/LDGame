@@ -6,6 +6,7 @@
 #include "LDGame/Character/LDCharacterBase.h"
 #include "LDHeroCharacter.generated.h"
 
+struct FInputActionValue;
 struct FGameplayTag;
 class ULDInputConfig;
 /**
@@ -17,6 +18,8 @@ class LDGAME_API ALDHeroCharacter : public ALDCharacterBase
 	GENERATED_BODY()
 	
 public:
+
+	ALDHeroCharacter();
 	
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -26,6 +29,10 @@ protected:
 	
 	void InputAbilityInputTagPressed(FGameplayTag InputTag);
 	void InputAbilityInputTagReleased(FGameplayTag InputTag);
+
+	void OnPlayerMove(const FInputActionValue& InputValue);
+	void OnPlayerSpin(const FInputActionValue& Value);
+	void OnPlayerZoom(const FInputActionValue& Value);
 	
 protected:
 	
@@ -34,4 +41,13 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LDGame|Input")
 	class UInputMappingContext* DefaultMappingContext;
+
+private:
+	/** Top down camera */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class UCameraComponent* TopDownCameraComponent;
+
+	/** Camera boom positioning the camera above the character */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class USpringArmComponent* CameraBoom;
 };

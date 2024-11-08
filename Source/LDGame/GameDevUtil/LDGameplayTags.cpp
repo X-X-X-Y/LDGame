@@ -8,5 +8,9 @@
 namespace LDGameplayTags
 {
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_TD_Move, "InputTag.TD.Move", "Top Down Move input.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Player_Move,"InputTag.Player.Move","Player Move input");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Player_Spin,"InputTag.Player.Spin","Player View Rotation");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Player_Zoom,"InputTag.Player.Zoom","Player View Zoom");
+	
 }
 

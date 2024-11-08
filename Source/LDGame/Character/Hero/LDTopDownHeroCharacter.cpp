@@ -22,8 +22,6 @@ ALDTopDownHeroCharacter::ALDTopDownHeroCharacter()
 {
 	CachedDestination = FVector::ZeroVector;
 
-	// Create a camera...
-	TopDownCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("TopDownCamera"));
 }
 
 #pragma region TopDown Hero Input
