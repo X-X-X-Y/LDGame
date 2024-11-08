@@ -32,7 +32,9 @@ protected:
 
 	void OnPlayerMove(const FInputActionValue& InputValue);
 	void OnPlayerSpin(const FInputActionValue& Value);
-	void OnPlayerZoom(const FInputActionValue& Value);
+	void OnPlayerZoom(const FInputActionValue& InputValue);
+
+	void UpdatePlayerViewZoom();
 	
 protected:
 	
@@ -42,6 +44,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LDGame|Input")
 	class UInputMappingContext* DefaultMappingContext;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LDGame|Zoom")
+	UCurveFloat* ZoomCurve;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LDGame|Zoom")
+	float ZoomValue;
+	
 private:
 	/** Top down camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -50,4 +58,6 @@ private:
 	/** Camera boom positioning the camera above the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
+
+	float ZoomDirection;
 };

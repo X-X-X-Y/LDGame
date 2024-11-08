@@ -34,7 +34,9 @@ void ALDHeroCharacter::BeginPlay()
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
-	} 
+	}
+
+	UpdatePlayerViewZoom();
 }
 #pragma endregion
 
@@ -52,8 +54,8 @@ void ALDHeroCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 
 	//绑定玩家视角输入
 	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_Move, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerMove);
-	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_Spin, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerMove);
-	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_Zoom, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerMove);
+	// LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_Spin, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerMove);
+	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_Zoom, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerZoom);
 }
 
 void ALDHeroCharacter::InputAbilityInputTagPressed(FGameplayTag InputTag)
@@ -91,10 +93,26 @@ void ALDHeroCharacter::OnPlayerSpin(const FInputActionValue& Value)
 {
 }
 
-void ALDHeroCharacter::OnPlayerZoom(const FInputActionValue& Value)
+void ALDHeroCharacter::OnPlayerZoom(const FInputActionValue& InputValue)
 {
+	if (ZoomCurve != nullptr)
+	{
+		ZoomDirection = InputValue.Get<float>();
+		UpdatePlayerViewZoom();
+	}
 }
 
 #pragma endregion
 
 #pragma endregion
+
+//
+void ALDHeroCharacter::UpdatePlayerViewZoom()
+{
+	ZoomValue = FMath::Clamp(ZoomDirection * 0.01 + ZoomValue,0.0,1.0);
+	CameraBoom->TargetArmLength = FMath::Lerp(800, 40000, ZoomCurve->GetFloatValue(ZoomValue));
+	
+	float RotationYValue = FMath::Lerp(-40, -55, ZoomCurve->GetFloatValue(ZoomValue));
+	FRotator NewRotation = FRotator(RotationYValue, 0.0f, 0.0f);
+	CameraBoom->SetRelativeRotation(NewRotation);
+}
