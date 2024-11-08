@@ -6,6 +6,8 @@
 #include "Character/Hero/LDHeroCharacter.h"
 #include "LDTopDownHeroCharacter.generated.h"
 
+class ALDPlayerController;
+struct FInputActionValue;
 /**
  * 
  */
@@ -15,7 +17,26 @@ class LDGAME_API ALDTopDownHeroCharacter : public ALDHeroCharacter
 	GENERATED_BODY()
 
 public:
+	ALDTopDownHeroCharacter();
+	
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+protected:
+	void OnInputStarted(const FInputActionValue& Value);
+	void OnSetDestinationTriggered(const FInputActionValue& Value);
+	void OnSetDestinationReleased(const FInputActionValue& Value);
+
+public:
+	/** Time Threshold to know if it was a short press */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LDGame|Input")
+	float ShortPressThreshold;
+	
+private:
+	FVector CachedDestination;
+	float FollowTime;
+	
+	/** Top down camera */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class UCameraComponent* TopDownCameraComponent;
 };
