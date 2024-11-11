@@ -37,6 +37,9 @@ protected:
 	void OnPlayerDragMove(const FInputActionValue& InputValue);
 
 	void UpdatePlayerViewZoom();
+
+private:
+	FVector GetMouseToGroundPlane() const;
 	
 protected:
 	
@@ -62,4 +65,5 @@ private:
 	class USpringArmComponent* CameraBoom;
 
 	float ZoomDirection;
+	FVector TargetHandle;
 };

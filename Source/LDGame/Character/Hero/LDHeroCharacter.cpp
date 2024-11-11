@@ -10,6 +10,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Input/LDInputComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Player/LDPlayerController.h"
 
 
@@ -95,11 +96,8 @@ void ALDHeroCharacter::OnPlayerMove(const FInputActionValue& InputValue)
 
 void ALDHeroCharacter::OnPlayerSelect(const FInputActionValue& InputValue)
 {
-	//这里处理点击逻辑
-	//1-检查交互点(如果是可交互的走对应的交互逻辑)
-	//	1-获取鼠标位置并映射到世界空间中
-	//  2-镜头指向当前点 和 镜头指向交点的向量 做向量减法,得到移动方向
-	//  3-鼠标拖拽的值运用到移动方向的向量上
+	//鼠标点击后获取在平面上的坐标
+	TargetHandle = GetMouseToGroundPlane();
 }
 
 void ALDHeroCharacter::OnPlayerSpin(const FInputActionValue& Value)
@@ -115,34 +113,31 @@ void ALDHeroCharacter::OnPlayerZoom(const FInputActionValue& InputValue)
 	}
 }
 
+PRAGMA_DISABLE_OPTIMIZATION
+
 void ALDHeroCharacter::OnPlayerDragMove(const FInputActionValue& InputValue)
 {
-	ALDPlayerController* PC = Cast<ALDPlayerController>(GetController());
-	if (PC)
-	{
-		//1-获取相机到选中点的向量 2-鼠标和
-		
-		// FVector2d CurrentMousePos;
-		// FVector WorldPosition;
-		// FVector WorldDirection;
-		// float TempValue = 0;
-		// FVector Intersection;
-		// PC->GetMousePosition(CurrentMousePos.X, CurrentMousePos.Y);
-		// if (PC->DeprojectScreenPositionToWorld(CurrentMousePos.X, CurrentMousePos.Y, WorldPosition, WorldDirection))
-		// {
-		// 	FPlane CurrentPlane = UKismetMathLibrary::MakePlaneFromPointAndNormal(FVector(0,0,0),FVector(0,0,0));
-		// 	WorldDirection = WorldDirection * 100000 + WorldPosition;
-		//
-		// 	UKismetMathLibrary::LinePlaneIntersection(WorldPosition, WorldDirection, CurrentPlane, TempValue, Intersection);
-		// }
-	}
+	//拖动移动
+	FVector CameraBoomLocation = CameraBoom->GetComponentLocation();
+	FVector CameraLocation = TopDownCameraComponent->GetComponentLocation();
+	FVector CameraBoomForward = CameraBoom->GetForwardVector();
+	
+	CameraBoomForward = CameraBoomForward * (CameraBoom->TargetArmLength - CameraBoom->
+		SocketOffset.X);
+	// CameraBoomForward = CameraBoomForward * -1.0f;
+	// FVector CameraBoomUp = CameraBoom->GetUpVector() * CameraBoom->SocketOffset.Z;
+	// FVector IntersectionVector = (CameraBoomForward + CameraBoomUp + CameraBoomLocation) - CameraLocation;
+	// FVector StoredMove = TargetHandle - GetMouseToGroundPlane() - IntersectionVector;
+	// AddActorWorldOffset(FVector(StoredMove.X, StoredMove.Y, 0));
 }
 
-#pragma endregion
+
 
 #pragma endregion
 
-#pragma region PlayerCamerView
+#pragma endregion
+
+#pragma region Player Public Function
 
 void ALDHeroCharacter::UpdatePlayerViewZoom()
 {
@@ -167,5 +162,45 @@ void ALDHeroCharacter::UpdatePlayerViewZoom()
 	//镜头可视角度
 	TopDownCameraComponent->SetFieldOfView(	FMath::Lerp(20, 15, ZoomCurve->GetFloatValue(ZoomValue)));
 }
+
+FVector ALDHeroCharacter::GetMouseToGroundPlane() const
+{
+	//1-获取相机到选中点的向量 2-鼠标和
+		
+	FVector2d CurrentPos;
+	FVector WorldPosition;
+	FVector WorldDirection;
+	float TempValue = 0;
+	FVector Intersection;
+	
+	ALDPlayerController* PC = Cast<ALDPlayerController>(GetController());
+	if (PC == nullptr)
+	{
+		return FVector::ZeroVector;
+	}
+
+	if (PC->GetMousePosition(CurrentPos.X, CurrentPos.Y))
+	{
+		//鼠标位置能够获取
+		PC->DeprojectScreenPositionToWorld(CurrentPos.X, CurrentPos.Y, WorldPosition, WorldDirection);
+	}
+	else
+	{
+		int32 SizeX, SizeY;
+		PC->GetViewportSize(SizeX, SizeY);
+		FVector2D ViewportSize = FVector2D(SizeX, SizeY);
+		CurrentPos = UKismetMathLibrary::Divide_Vector2DVector2D(ViewportSize,FVector2d(2.0,2.0));
+		PC->DeprojectScreenPositionToWorld(CurrentPos.X, CurrentPos.Y, WorldPosition, WorldDirection);
+	}
+
+	FPlane CurrentPlane = UKismetMathLibrary::MakePlaneFromPointAndNormal(FVector(0, 0, 0), FVector(0, 0, 1));
+	FVector LineEnd = WorldPosition + (WorldDirection * 100000);
+
+	UKismetMathLibrary::LinePlaneIntersection(WorldPosition, LineEnd, CurrentPlane, TempValue, Intersection);
+
+	return Intersection; 
+}
+
+PRAGMA_ENABLE_OPTIMIZATION
 
 #pragma endregion
