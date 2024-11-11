@@ -118,17 +118,23 @@ PRAGMA_DISABLE_OPTIMIZATION
 void ALDHeroCharacter::OnPlayerDragMove(const FInputActionValue& InputValue)
 {
 	//拖动移动
+	FVector CurrentPos = GetMouseToGroundPlane();
+	
 	FVector CameraBoomLocation = CameraBoom->GetComponentLocation();
 	FVector CameraLocation = TopDownCameraComponent->GetComponentLocation();
 	FVector CameraBoomForward = CameraBoom->GetForwardVector();
 	
 	CameraBoomForward = CameraBoomForward * (CameraBoom->TargetArmLength - CameraBoom->
 		SocketOffset.X);
-	// CameraBoomForward = CameraBoomForward * -1.0f;
-	// FVector CameraBoomUp = CameraBoom->GetUpVector() * CameraBoom->SocketOffset.Z;
-	// FVector IntersectionVector = (CameraBoomForward + CameraBoomUp + CameraBoomLocation) - CameraLocation;
-	// FVector StoredMove = TargetHandle - GetMouseToGroundPlane() - IntersectionVector;
-	// AddActorWorldOffset(FVector(StoredMove.X, StoredMove.Y, 0));
+	CameraBoomForward = CameraBoomForward * -1.0f;
+	FVector CameraBoomUp = CameraBoom->GetUpVector() * CameraBoom->SocketOffset.Z;
+	FVector IntersectionVector = (CameraBoomForward + CameraBoomUp + CameraBoomLocation) - CameraLocation;
+	FVector StoredMove = TargetHandle - CurrentPos - IntersectionVector;
+
+	UE_LOG(LogTemp, Log, TEXT("Current TargetHandle X = %f, Y = %f , Z = %f"), TargetHandle.X, TargetHandle.Y, TargetHandle.Z);
+	UE_LOG(LogTemp, Log, TEXT("Current POS X = %f, Y = %f , Z = %f"), CurrentPos.X, CurrentPos.Y, CurrentPos.Z);
+	UE_LOG(LogTemp, Log, TEXT("Current TargetHandle X = %f, Y = %f , Z = %f"), TargetHandle.X, TargetHandle.Y, TargetHandle.Z);
+	AddActorWorldOffset(FVector(StoredMove.X, StoredMove.Y, 0));
 }
 
 

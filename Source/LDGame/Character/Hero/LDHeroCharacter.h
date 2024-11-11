@@ -65,5 +65,5 @@ private:
 	class USpringArmComponent* CameraBoom;
 
 	float ZoomDirection;
-	FVector TargetHandle;
+	FVector TargetHandle = FVector::ZeroVector;
 };
