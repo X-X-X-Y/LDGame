@@ -59,7 +59,7 @@ void ALDHeroCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_Move, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerMove);
 	// LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_Spin, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerSpin);
 	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_Zoom, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerZoom);
-	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_Select, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerSelect);
+	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_Select, ETriggerEvent::Started, this, &ThisClass::OnPlayerSelect);
 	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_DMove, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerDragMove);
 }
 
@@ -131,9 +131,6 @@ void ALDHeroCharacter::OnPlayerDragMove(const FInputActionValue& InputValue)
 	FVector IntersectionVector = (CameraBoomForward + CameraBoomUp + CameraBoomLocation) - CameraLocation;
 	FVector StoredMove = TargetHandle - CurrentPos - IntersectionVector;
 
-	UE_LOG(LogTemp, Log, TEXT("Current TargetHandle X = %f, Y = %f , Z = %f"), TargetHandle.X, TargetHandle.Y, TargetHandle.Z);
-	UE_LOG(LogTemp, Log, TEXT("Current POS X = %f, Y = %f , Z = %f"), CurrentPos.X, CurrentPos.Y, CurrentPos.Z);
-	UE_LOG(LogTemp, Log, TEXT("Current TargetHandle X = %f, Y = %f , Z = %f"), TargetHandle.X, TargetHandle.Y, TargetHandle.Z);
 	AddActorWorldOffset(FVector(StoredMove.X, StoredMove.Y, 0));
 }
 
