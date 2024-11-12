@@ -6,6 +6,7 @@
 #include "LDGame/Character/LDCharacterBase.h"
 #include "LDHeroCharacter.generated.h"
 
+class USphereComponent;
 struct FInputActionValue;
 struct FGameplayTag;
 class ULDInputConfig;
@@ -39,7 +40,8 @@ protected:
 	void UpdatePlayerViewZoom();
 
 private:
-	FVector GetMouseToGroundPlane() const;
+	void MouseToGroundPlane(FVector& Intersection, bool& bIsMouse) const;
+	void MoveTracking();
 	
 protected:
 	
@@ -55,6 +57,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LDGame|Zoom")
 	float ZoomValue;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "LDGame|Game")
+	UStaticMeshComponent* PlayerCursor;
+
+	
+	FTimerHandle MoveTrackingTimerHandle;
+
 private:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -64,6 +72,8 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
 
+
 	float ZoomDirection;
 	FVector TargetHandle = FVector::ZeroVector;
+	bool bIsMousePos = false;
 };

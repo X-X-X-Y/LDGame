@@ -6,11 +6,11 @@
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "GameDevUtil/LDGameplayTags.h"
+#include "GameDevUtil/LDLogChannels.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Input/LDInputComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "Player/LDPlayerController.h"
 
 
@@ -24,13 +24,17 @@ ALDHeroCharacter::ALDHeroCharacter()
 	TopDownCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("TopDownCamera"));
 	TopDownCameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	TopDownCameraComponent->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+
+	PlayerCursor = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlayerCursor"));
 }
 
 #pragma region UR Behaviour
+
 void ALDHeroCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//Input
 	if(ALDPlayerController* PC = Cast<ALDPlayerController>(GetController()))
 	{
 		if(UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
@@ -39,8 +43,16 @@ void ALDHeroCharacter::BeginPlay()
 		}
 	}
 
+	//ViewZoom
 	UpdatePlayerViewZoom();
+
+	//PlayerViewPos
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().SetTimer(MoveTrackingTimerHandle, FTimerDelegate::CreateUObject(this, &ThisClass::MoveTracking),0.02f,true);
+	}
 }
+
 #pragma endregion
 
 #pragma region PlayerInput
@@ -97,7 +109,7 @@ void ALDHeroCharacter::OnPlayerMove(const FInputActionValue& InputValue)
 void ALDHeroCharacter::OnPlayerSelect(const FInputActionValue& InputValue)
 {
 	//鼠标点击后获取在平面上的坐标
-	TargetHandle = GetMouseToGroundPlane();
+	MouseToGroundPlane(TargetHandle, bIsMousePos);
 }
 
 void ALDHeroCharacter::OnPlayerSpin(const FInputActionValue& Value)
@@ -113,12 +125,11 @@ void ALDHeroCharacter::OnPlayerZoom(const FInputActionValue& InputValue)
 	}
 }
 
-PRAGMA_DISABLE_OPTIMIZATION
-
 void ALDHeroCharacter::OnPlayerDragMove(const FInputActionValue& InputValue)
 {
 	//拖动移动
-	FVector CurrentPos = GetMouseToGroundPlane();
+	FVector CurrentPos;
+	MouseToGroundPlane(CurrentPos, bIsMousePos);
 	
 	FVector CameraBoomLocation = CameraBoom->GetComponentLocation();
 	FVector CameraLocation = TopDownCameraComponent->GetComponentLocation();
@@ -134,13 +145,11 @@ void ALDHeroCharacter::OnPlayerDragMove(const FInputActionValue& InputValue)
 	AddActorWorldOffset(FVector(StoredMove.X, StoredMove.Y, 0));
 }
 
-
-
 #pragma endregion
 
 #pragma endregion
 
-#pragma region Player Public Function
+#pragma region PlayerView Helper
 
 void ALDHeroCharacter::UpdatePlayerViewZoom()
 {
@@ -157,7 +166,7 @@ void ALDHeroCharacter::UpdatePlayerViewZoom()
 	UCharacterMovementComponent* HeroMoveComp = GetCharacterMovement();
 	if (HeroMoveComp)
 	{
-		HeroMoveComp->MaxWalkSpeed = FMath::Lerp(1000, 6000, ZoomCurve->GetFloatValue(ZoomValue));
+		HeroMoveComp->MaxWalkSpeed = FMath::Lerp(2000, 8000, ZoomCurve->GetFloatValue(ZoomValue));
 	}
 
 	//TODO:镜头后处理
@@ -166,7 +175,7 @@ void ALDHeroCharacter::UpdatePlayerViewZoom()
 	TopDownCameraComponent->SetFieldOfView(	FMath::Lerp(20, 15, ZoomCurve->GetFloatValue(ZoomValue)));
 }
 
-FVector ALDHeroCharacter::GetMouseToGroundPlane() const
+void ALDHeroCharacter::MouseToGroundPlane(FVector& Intersection, bool& bIsMouse) const
 {
 	//1-获取相机到选中点的向量 2-鼠标和
 		
@@ -174,18 +183,20 @@ FVector ALDHeroCharacter::GetMouseToGroundPlane() const
 	FVector WorldPosition;
 	FVector WorldDirection;
 	float TempValue = 0;
-	FVector Intersection;
+
 	
 	ALDPlayerController* PC = Cast<ALDPlayerController>(GetController());
 	if (PC == nullptr)
 	{
-		return FVector::ZeroVector;
+		bIsMouse = false;
+		return;
 	}
 
 	if (PC->GetMousePosition(CurrentPos.X, CurrentPos.Y))
 	{
 		//鼠标位置能够获取
 		PC->DeprojectScreenPositionToWorld(CurrentPos.X, CurrentPos.Y, WorldPosition, WorldDirection);
+		bIsMouse = true;
 	}
 	else
 	{
@@ -194,16 +205,40 @@ FVector ALDHeroCharacter::GetMouseToGroundPlane() const
 		FVector2D ViewportSize = FVector2D(SizeX, SizeY);
 		CurrentPos = UKismetMathLibrary::Divide_Vector2DVector2D(ViewportSize,FVector2d(2.0,2.0));
 		PC->DeprojectScreenPositionToWorld(CurrentPos.X, CurrentPos.Y, WorldPosition, WorldDirection);
+		bIsMouse = false;
 	}
 
 	FPlane CurrentPlane = UKismetMathLibrary::MakePlaneFromPointAndNormal(FVector(0, 0, 0), FVector(0, 0, 1));
 	FVector LineEnd = WorldPosition + (WorldDirection * 100000);
 
 	UKismetMathLibrary::LinePlaneIntersection(WorldPosition, LineEnd, CurrentPlane, TempValue, Intersection);
-
-	return Intersection; 
 }
 
-PRAGMA_ENABLE_OPTIMIZATION
+void ALDHeroCharacter::MoveTracking()
+{
+	FVector CurrentTargetPos;
+	MouseToGroundPlane(CurrentTargetPos, bIsMousePos);
+	USkeletalMeshComponent* CurrentPlayerMesh = GetMesh();
+	if (!IsValid(CurrentPlayerMesh) || !CurrentPlayerMesh)
+	{
+		UE_LOG(LogLDCharacter, Error, TEXT("CapsuleComp is nullptr!"));
+		return;
+	}
+	CurrentTargetPos += FVector(0, 0, 10);
+	UE_LOG(LogLDCharacter, Log, TEXT("Current Target Pos X= %f Y=  %f Z= %f "), CurrentTargetPos.X, CurrentTargetPos.Y,
+	       CurrentTargetPos.Z);
+	CurrentPlayerMesh->SetWorldLocation(CurrentTargetPos,false);
+
+	//UpdateCursorPosition
+	FTransform CursorTargetTransform;
+	CursorTargetTransform = FTransform(CurrentPlayerMesh->GetComponentRotation(),CurrentPlayerMesh->GetComponentLocation(),FVector(2,2,1));
+	if (PlayerCursor)
+	{
+		UWorld* World = GetWorld();
+		float DeltaTime = World? World->GetDeltaSeconds() : 0.0f;
+		FTransform CursorNewTransform = UKismetMathLibrary::TInterpTo(PlayerCursor->GetComponentTransform(),CursorTargetTransform,DeltaTime,12.0);
+		PlayerCursor->SetWorldTransform(CursorNewTransform);
+	}
+}
 
 #pragma endregion
