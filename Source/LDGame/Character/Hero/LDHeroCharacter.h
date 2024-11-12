@@ -3,13 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "LDGame/Character/LDCharacterBase.h"
+#include "Character/Hero/LDPlayerPawn.h"
 #include "LDHeroCharacter.generated.h"
 
-class USphereComponent;
+class ALDPlayerController;
 struct FInputActionValue;
-struct FGameplayTag;
-class ULDInputConfig;
 /**
  * 
  */
@@ -17,63 +15,24 @@ UCLASS()
 class LDGAME_API ALDHeroCharacter : public ALDCharacterBase
 {
 	GENERATED_BODY()
-	
-public:
 
+public:
 	ALDHeroCharacter();
 	
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
-	virtual void BeginPlay() override;
+	void OnInputStarted(const FInputActionValue& Value);
+	void OnSetDestinationTriggered(const FInputActionValue& Value);
+	void OnSetDestinationReleased(const FInputActionValue& Value);
+
+public:
+	/** Time Threshold to know if it was a short press */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LDGame|Input")
+	float ShortPressThreshold;
 	
-	void InputAbilityInputTagPressed(FGameplayTag InputTag);
-	void InputAbilityInputTagReleased(FGameplayTag InputTag);
-
-	void OnPlayerMove(const FInputActionValue& InputValue);
-	void OnPlayerSelect(const FInputActionValue& InputValue);
-	void OnPlayerSpin(const FInputActionValue& Value);
-	void OnPlayerZoom(const FInputActionValue& InputValue);
-	void OnPlayerDragMove(const FInputActionValue& InputValue);
-
-	void UpdatePlayerViewZoom();
-
 private:
-	void MouseToGroundPlane(FVector& Intersection, bool& bIsMouse) const;
-	void MoveTracking();
-	
-protected:
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LDGame|Input")
-	ULDInputConfig* InputConfig;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LDGame|Input")
-	class UInputMappingContext* DefaultMappingContext;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LDGame|Zoom")
-	UCurveFloat* ZoomCurve;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LDGame|Zoom")
-	float ZoomValue;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "LDGame|Game")
-	UStaticMeshComponent* PlayerCursor;
-
-	
-	FTimerHandle MoveTrackingTimerHandle;
-
-private:
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class UCameraComponent* TopDownCameraComponent;
-
-	/** Camera boom positioning the camera above the character */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class USpringArmComponent* CameraBoom;
-
-
-	float ZoomDirection;
-	FVector TargetHandle = FVector::ZeroVector;
-	bool bIsMousePos = false;
+	FVector CachedDestination;
+	float FollowTime;
 };

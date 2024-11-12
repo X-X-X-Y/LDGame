@@ -1,244 +1,101 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "LDHeroCharacter.h"
+#include "Character/Hero/LDHeroCharacter.h"
 
+#include "AI/NavigationSystemBase.h"
+#include "GameDevUtil/LDGameplayTags.h"
+#include "Input/LDInputComponent.h"
+#include "Player/LDPlayerController.h"
+#include "GameFramework/Pawn.h"
+#include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "NiagaraSystem.h"
+#include "NiagaraFunctionLibrary.h"
+#include "Engine/World.h"
+#include "EnhancedInputComponent.h"
+#include "InputActionValue.h"
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
-#include "GameDevUtil/LDGameplayTags.h"
-#include "GameDevUtil/LDLogChannels.h"
-#include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/SpringArmComponent.h"
-#include "Input/LDInputComponent.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "Player/LDPlayerController.h"
-
+#include "Engine/LocalPlayer.h"
 
 ALDHeroCharacter::ALDHeroCharacter()
 {
-	// Create a camera boom...
-	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	CameraBoom->SetupAttachment(RootComponent);
+	CachedDestination = FVector::ZeroVector;
 
-	// Create a camera...
-	TopDownCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("TopDownCamera"));
-	TopDownCameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
-	TopDownCameraComponent->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
-
-	PlayerCursor = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlayerCursor"));
 }
 
-#pragma region UR Behaviour
-
-void ALDHeroCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-
-	//Input
-	if(ALDPlayerController* PC = Cast<ALDPlayerController>(GetController()))
-	{
-		if(UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-		}
-	}
-
-	//ViewZoom
-	UpdatePlayerViewZoom();
-
-	//PlayerViewPos
-	if (UWorld* World = GetWorld())
-	{
-		World->GetTimerManager().SetTimer(MoveTrackingTimerHandle, FTimerDelegate::CreateUObject(this, &ThisClass::MoveTracking),0.02f,true);
-	}
-}
-
-#pragma endregion
-
-#pragma region PlayerInput
+#pragma region TopDown Hero Input
 
 void ALDHeroCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
-	//绑定技能输入
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	//基础能力
 	ULDInputComponent* LDInputComponent = Cast<ULDInputComponent>(PlayerInputComponent);
 	check(LDInputComponent);
 
 	TArray<uint32> BindHandles;
-	LDInputComponent->BindAbilityActions(InputConfig, this, &ThisClass::InputAbilityInputTagPressed,
-	&ThisClass::InputAbilityInputTagReleased, /*out*/ BindHandles);
-
-	//绑定玩家视角输入
-	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_Move, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerMove);
-	// LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_Spin, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerSpin);
-	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_Zoom, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerZoom);
-	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_Select, ETriggerEvent::Started, this, &ThisClass::OnPlayerSelect);
-	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_DMove, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerDragMove);
+	// LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_TD_Move, ETriggerEvent::Started, this, &ThisClass::OnInputStarted);
+	// LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_TD_Move, ETriggerEvent::Triggered, this, &ThisClass::OnSetDestinationTriggered);
+	// LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_TD_Move, ETriggerEvent::Completed, this, &ThisClass::OnSetDestinationReleased);
+	// LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_TD_Move, ETriggerEvent::Canceled, this, &ThisClass::OnSetDestinationReleased);
 }
 
-void ALDHeroCharacter::InputAbilityInputTagPressed(FGameplayTag InputTag)
-{
-	
-}
+#pragma region TopDown Hero MoveToTarget
 
-void ALDHeroCharacter::InputAbilityInputTagReleased(FGameplayTag InputTag)
+void ALDHeroCharacter::OnInputStarted(const FInputActionValue& Value)
 {
-}
-#pragma region Player Native Input
-
-void ALDHeroCharacter::OnPlayerMove(const FInputActionValue& InputValue)
-{
-	ALDPlayerController* PC = Cast<ALDPlayerController>(GetController());
-	if (PC)
+	ALDPlayerController* LDGamePC = GetController<ALDPlayerController>();
+	if (LDGamePC)
 	{
-		const FVector2D Value = InputValue.Get<FVector2D>();
-		const FRotator MovementRotation(0.0f, Controller->GetControlRotation().Yaw, 0.0f);
-		if (Value.X != 0.0f)
-		{
-			const FVector MovementDirection = MovementRotation.RotateVector(FVector::RightVector);
-			AddMovementInput(MovementDirection, Value.X);
-		}
-
-		if (Value.Y != 0.0f)
-		{
-			const FVector MovementDirection = MovementRotation.RotateVector(FVector::ForwardVector);
-			AddMovementInput(MovementDirection, Value.Y);
-		}
+		LDGamePC->StopMovement();
 	}
 }
 
-void ALDHeroCharacter::OnPlayerSelect(const FInputActionValue& InputValue)
+void ALDHeroCharacter::OnSetDestinationTriggered(const FInputActionValue& Value)
 {
-	//鼠标点击后获取在平面上的坐标
-	MouseToGroundPlane(TargetHandle, bIsMousePos);
-}
-
-void ALDHeroCharacter::OnPlayerSpin(const FInputActionValue& Value)
-{
-}
-
-void ALDHeroCharacter::OnPlayerZoom(const FInputActionValue& InputValue)
-{
-	if (ZoomCurve != nullptr)
+	// We flag that the input is being pressed
+	FollowTime += GetWorld()->GetDeltaSeconds();
+	
+	ALDPlayerController* LDGamePC = GetController<ALDPlayerController>();
+	if (LDGamePC)
 	{
-		ZoomDirection = InputValue.Get<float>();
-		UpdatePlayerViewZoom();
+		FHitResult Hit;
+		bool bHitSuccessful = false;
+		bHitSuccessful = LDGamePC->GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, true, Hit);
+		if (bHitSuccessful)
+		{
+			CachedDestination = Hit.Location;
+		}
+
+		FVector WorldDirection = (CachedDestination - GetActorLocation()).GetSafeNormal();
+		AddMovementInput(WorldDirection, 1.0, false);
 	}
 }
 
-void ALDHeroCharacter::OnPlayerDragMove(const FInputActionValue& InputValue)
+void ALDHeroCharacter::OnSetDestinationReleased(const FInputActionValue& Value)
 {
-	//拖动移动
-	FVector CurrentPos;
-	MouseToGroundPlane(CurrentPos, bIsMousePos);
-	
-	FVector CameraBoomLocation = CameraBoom->GetComponentLocation();
-	FVector CameraLocation = TopDownCameraComponent->GetComponentLocation();
-	FVector CameraBoomForward = CameraBoom->GetForwardVector();
-	
-	CameraBoomForward = CameraBoomForward * (CameraBoom->TargetArmLength - CameraBoom->
-		SocketOffset.X);
-	CameraBoomForward = CameraBoomForward * -1.0f;
-	FVector CameraBoomUp = CameraBoom->GetUpVector() * CameraBoom->SocketOffset.Z;
-	FVector IntersectionVector = (CameraBoomForward + CameraBoomUp + CameraBoomLocation) - CameraLocation;
-	FVector StoredMove = TargetHandle - CurrentPos - IntersectionVector;
+	// If it was a short press
+	if (FollowTime <= ShortPressThreshold)
+	{
+		ALDPlayerController* LDGamePC = GetController<ALDPlayerController>();
+		if (LDGamePC)
+		{
+			// We move there and spawn some particles
+			UAIBlueprintHelperLibrary::SimpleMoveToLocation(LDGamePC, CachedDestination);
+			// UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, CachedDestination, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
+		}
+	}
 
-	AddActorWorldOffset(FVector(StoredMove.X, StoredMove.Y, 0));
+	FollowTime = 0.f;
 }
+
+
 
 #pragma endregion
 
 #pragma endregion
 
-#pragma region PlayerView Helper
-
-void ALDHeroCharacter::UpdatePlayerViewZoom()
-{
-	//距离
-	ZoomValue = FMath::Clamp(ZoomDirection * 0.01 + ZoomValue,0.0,1.0);
-	CameraBoom->TargetArmLength = FMath::Lerp(800, 40000, ZoomCurve->GetFloatValue(ZoomValue));
-
-	//镜头微量偏转
-	float RotationYValue = FMath::Lerp(-40, -55, ZoomCurve->GetFloatValue(ZoomValue));
-	FRotator NewRotation = FRotator(RotationYValue, 0.0f, 0.0f);
-	CameraBoom->SetRelativeRotation(NewRotation);
-
-	//镜头越远移动速度越快
-	UCharacterMovementComponent* HeroMoveComp = GetCharacterMovement();
-	if (HeroMoveComp)
-	{
-		HeroMoveComp->MaxWalkSpeed = FMath::Lerp(2000, 8000, ZoomCurve->GetFloatValue(ZoomValue));
-	}
-
-	//TODO:镜头后处理
-
-	//镜头可视角度
-	TopDownCameraComponent->SetFieldOfView(	FMath::Lerp(20, 15, ZoomCurve->GetFloatValue(ZoomValue)));
-}
-
-void ALDHeroCharacter::MouseToGroundPlane(FVector& Intersection, bool& bIsMouse) const
-{
-	//1-获取相机到选中点的向量 2-鼠标和
-		
-	FVector2d CurrentPos;
-	FVector WorldPosition;
-	FVector WorldDirection;
-	float TempValue = 0;
-
-	
-	ALDPlayerController* PC = Cast<ALDPlayerController>(GetController());
-	if (PC == nullptr)
-	{
-		bIsMouse = false;
-		return;
-	}
-
-	if (PC->GetMousePosition(CurrentPos.X, CurrentPos.Y))
-	{
-		//鼠标位置能够获取
-		PC->DeprojectScreenPositionToWorld(CurrentPos.X, CurrentPos.Y, WorldPosition, WorldDirection);
-		bIsMouse = true;
-	}
-	else
-	{
-		int32 SizeX, SizeY;
-		PC->GetViewportSize(SizeX, SizeY);
-		FVector2D ViewportSize = FVector2D(SizeX, SizeY);
-		CurrentPos = UKismetMathLibrary::Divide_Vector2DVector2D(ViewportSize,FVector2d(2.0,2.0));
-		PC->DeprojectScreenPositionToWorld(CurrentPos.X, CurrentPos.Y, WorldPosition, WorldDirection);
-		bIsMouse = false;
-	}
-
-	FPlane CurrentPlane = UKismetMathLibrary::MakePlaneFromPointAndNormal(FVector(0, 0, 0), FVector(0, 0, 1));
-	FVector LineEnd = WorldPosition + (WorldDirection * 100000);
-
-	UKismetMathLibrary::LinePlaneIntersection(WorldPosition, LineEnd, CurrentPlane, TempValue, Intersection);
-}
-
-void ALDHeroCharacter::MoveTracking()
-{
-	FVector CurrentTargetPos;
-	MouseToGroundPlane(CurrentTargetPos, bIsMousePos);
-	USkeletalMeshComponent* CurrentPlayerMesh = GetMesh();
-	if (!IsValid(CurrentPlayerMesh) || !CurrentPlayerMesh)
-	{
-		UE_LOG(LogLDCharacter, Error, TEXT("CapsuleComp is nullptr!"));
-		return;
-	}
-	CurrentTargetPos += FVector(0, 0, 10);
-	UE_LOG(LogLDCharacter, Log, TEXT("Current Target Pos X= %f Y=  %f Z= %f "), CurrentTargetPos.X, CurrentTargetPos.Y,
-	       CurrentTargetPos.Z);
-	CurrentPlayerMesh->SetWorldLocation(CurrentTargetPos,false);
-
-	//UpdateCursorPosition
-	FTransform CursorTargetTransform;
-	CursorTargetTransform = FTransform(CurrentPlayerMesh->GetComponentRotation(),CurrentPlayerMesh->GetComponentLocation(),FVector(2,2,1));
-	if (PlayerCursor)
-	{
-		UWorld* World = GetWorld();
-		float DeltaTime = World? World->GetDeltaSeconds() : 0.0f;
-		FTransform CursorNewTransform = UKismetMathLibrary::TInterpTo(PlayerCursor->GetComponentTransform(),CursorTargetTransform,DeltaTime,12.0);
-		PlayerCursor->SetWorldTransform(CursorNewTransform);
-	}
-}
+#pragma region Common Functions
 
 #pragma endregion
