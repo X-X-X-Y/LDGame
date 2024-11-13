@@ -22,10 +22,15 @@ public class LDGame : ModuleRules
 			"GameplayTags",
 			"GameplayTasks",
 			"Niagara",
-			"AIModule"
+			"AIModule",
+			"DataRegistry"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { });
+		PrivateDependencyModuleNames.AddRange(new string[]
+		{
+			"UMG",
+			"CommonUI",
+		});
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

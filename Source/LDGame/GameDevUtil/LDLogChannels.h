@@ -4,6 +4,5 @@
 
 #include "Logging/LogMacros.h"
 
-class UObject;
 LDGAME_API DECLARE_LOG_CATEGORY_EXTERN(LogLD, Log, All);
 LDGAME_API DECLARE_LOG_CATEGORY_EXTERN(LogLDCharacter, Log, All);

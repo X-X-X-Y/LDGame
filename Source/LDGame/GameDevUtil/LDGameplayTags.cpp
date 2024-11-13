@@ -13,6 +13,6 @@ namespace LDGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Player_DMove,"InputTag.Player.DMove","Player Mouse Move input");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Player_Spin,"InputTag.Player.Spin","Player View Rotation");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Player_Zoom,"InputTag.Player.Zoom","Player View Zoom");
-	
-}
 
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(XiuShiHeroTag_TestXiuShi,"XiuShi.TestMan","Use Test XiuShi");
+}

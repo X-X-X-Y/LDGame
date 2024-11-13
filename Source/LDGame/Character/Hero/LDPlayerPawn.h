@@ -70,6 +70,8 @@ protected:
 	
 	FTimerHandle MoveTrackingTimerHandle;
 
+	USceneComponent* PlayerPawnRoot;
+
 private:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))

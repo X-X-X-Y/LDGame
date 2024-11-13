@@ -18,6 +18,9 @@
 
 ALDPlayerPawn::ALDPlayerPawn()
 {
+	PlayerPawnRoot = CreateDefaultSubobject<USceneComponent>(TEXT("PlayerPawnRoot"));
+	SetRootComponent(PlayerPawnRoot);
+	
 	// Create a camera boom...
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -30,6 +33,7 @@ ALDPlayerPawn::ALDPlayerPawn()
 	PlayerPawnMovement = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("PlayerPawnMovement"));
 	PlayerCursorCollision = CreateDefaultSubobject<USphereComponent>(TEXT("PlayerCursorCollision"));
 	PlayerCursorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlayerCursorMesh"));
+
 }
 
 #pragma region UR Behaviour
@@ -228,8 +232,6 @@ void ALDPlayerPawn::MoveTracking()
 		return;
 	}
 	CurrentTargetPos += FVector(0, 0, 10);
-	UE_LOG(LogLDCharacter, Log, TEXT("Current Target Pos X= %f Y=  %f Z= %f "), CurrentTargetPos.X, CurrentTargetPos.Y,
-	       CurrentTargetPos.Z);
 	PlayerCursorCollision->SetWorldLocation(CurrentTargetPos,false);
 	
 	//UpdateCursorPosition
