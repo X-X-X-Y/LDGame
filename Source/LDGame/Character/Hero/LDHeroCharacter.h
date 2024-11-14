@@ -27,6 +27,13 @@ protected:
 	void OnSetDestinationTriggered(const FInputActionValue& Value);
 	void OnSetDestinationReleased(const FInputActionValue& Value);
 
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LDGame|Input")
+	ULDInputConfig* InputConfig;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LDGame|Input")
+	UInputMappingContext* DefaultMappingContext;
+
 public:
 	/** Time Threshold to know if it was a short press */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LDGame|Input")

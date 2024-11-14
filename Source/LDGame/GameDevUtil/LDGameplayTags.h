@@ -16,5 +16,5 @@ namespace LDGameplayTags
 	LDGAME_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Player_DMove);
 
 	//TempXiuHero
-	LDGAME_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(XiuShiHeroTag_TestXiuShi);
+	LDGAME_API  UE_DECLARE_GAMEPLAY_TAG_EXTERN(XiuShiHeroTag_TestXiuShi);
 }
