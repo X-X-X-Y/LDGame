@@ -52,7 +52,7 @@ void ALDTopGameMode::SpawnHeroActors(const FDataRegistryAcquireResult& VehListHa
 {
 	if (const FLDXiuShiHeroDataConfig* HeroData = VehListHandle.GetItem<FLDXiuShiHeroDataConfig>())
 	{
-		//Get SpawnCharacterActor
+		//TODO:到时候思考一下英雄出生点的方式
 		for (TActorIterator<ALDCharacterSpawnActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 		{
 			ALDCharacterSpawnActor* SpawnPoint = Cast<ALDCharacterSpawnActor>(*ActorItr);

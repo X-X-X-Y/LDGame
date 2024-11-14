@@ -27,7 +27,7 @@ public:
 
 public:
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "LDGame|SpawnActor")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LDGame|SpawnActor")
 	ESpawnCharacterType SpawnCharacterType = ESpawnCharacterType::HeroActor;
 
 	bool bHasSpawnedHero = false;
