@@ -1,9 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+// ReSharper disable CppUE4CodingStandardNamingViolationWarning
 #include "LevelActor/LDCharacterSpawnActor.h"
 #include "Character/Hero/LDCharacterHero.h"
 #include "GameDevUtil/LDLogChannels.h"
+#include "GameMode/LDTopGameMode.h"
 
 ALDCharacterSpawnActor::ALDCharacterSpawnActor()
 {
@@ -29,8 +31,15 @@ void ALDCharacterSpawnActor::SpawnHeroCharacterActor(TSoftClassPtr<ALDCharacterH
 
 	if (UWorld* World = GetWorld(); bHasSpawnedHero == false && World)
 	{
-		//TODO:需要改进生成策略
-		World->SpawnActor<ALDCharacterHero>(HeroCharacter.Get(), this->GetActorLocation(), this->GetActorRotation());
+		//TODO:需要改进生成策略-暂时一个点只能生成一个
+		ALDCharacterHero* HeroPawn = World->SpawnActor<ALDCharacterHero>(HeroCharacter.LoadSynchronous(), this->GetActorLocation(), this->GetActorRotation());
+		bHasSpawnedHero = true;
+		
+		ALDTopGameMode* LDGameMode = World->GetAuthGameMode<ALDTopGameMode>();
+		if (LDGameMode)
+		{
+			LDGameMode->AddNewHeroInList(HeroPawn);
+		}
 	}
 }
 

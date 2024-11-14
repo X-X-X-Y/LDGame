@@ -7,7 +7,7 @@
 #include "LDTopGameMode.generated.h"
 
 struct FDataRegistryAcquireResult;
-class ALDHeroCharacter;
+class ALDCharacterHero;
 /**
  * 
  */
@@ -15,16 +15,21 @@ UCLASS()
 class LDGAME_API ALDTopGameMode : public ALDGameModeBase
 {
 	GENERATED_BODY()
-	
-public:
 
 public:
-	TArray<ALDHeroCharacter*> CurrentHeroPawnList;
 	
+	ALDTopGameMode();
+
+	TArray<ALDCharacterHero*> GetCurrentHeroActors();
+	void AddNewHeroInList(ALDCharacterHero* HeroActor); 
+
 protected:
 	virtual void BeginPlay() override;
 
 private:
 	void InitHeroData();
 	void SpawnHeroActors(const FDataRegistryAcquireResult& VehListHandle);
+
+private:
+	TArray<ALDCharacterHero*> CurrentHeroActorList;
 };

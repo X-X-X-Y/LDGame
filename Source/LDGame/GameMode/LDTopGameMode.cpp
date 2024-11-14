@@ -11,25 +11,16 @@
 #include "GameDevUtil/LDLogChannels.h"
 #include "LevelActor/LDCharacterSpawnActor.h"
 
+ALDTopGameMode::ALDTopGameMode()
+{
+	CurrentHeroActorList.Empty();
+}
+
 void ALDTopGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
 	InitHeroData();
-	// UDataRegistrySubsystem* DRSubsystem = UDataRegistrySubsystem::Get();
-	// if (DRSubsystem)
-	// {
-	// 	TArray<FDataRegistrySourceItemId> HeroDataConfigs;
-	// 	UDataRegistry* Test = DRSubsystem->GetRegistryForType(LDGameDataRegistryType::NAME_XiuShiHeroRegistryID);
-	// 	if (Test)
-	// 	{
-	// 		Test->GetAllSourceItems(HeroDataConfigs);
-	// 		if (HeroDataConfigs.Num() > 0)
-	// 		{
-	// 			UE_LOG(LogLD, Log, TEXT("Got it!"))
-	// 		}
-	// 	}
-	// }
 }
 
 #pragma region XiuShi Actor
@@ -64,5 +55,18 @@ void ALDTopGameMode::SpawnHeroActors(const FDataRegistryAcquireResult& VehListHa
 	}
 }
 
+
+TArray<ALDCharacterHero*> ALDTopGameMode::GetCurrentHeroActors()
+{
+	return CurrentHeroActorList;
+}
+
+void ALDTopGameMode::AddNewHeroInList(ALDCharacterHero* HeroActor)
+{
+	if (HeroActor)
+	{
+		CurrentHeroActorList.AddUnique(HeroActor);
+	}
+}
 
 #pragma endregion
