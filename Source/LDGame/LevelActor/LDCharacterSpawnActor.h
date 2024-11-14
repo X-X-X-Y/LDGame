@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "LDCharacterSpawnActor.generated.h"
 
-class ALDHeroCharacter;
+class ALDCharacterHero;
 
 UENUM(BlueprintType)
 enum class ESpawnCharacterType : uint8
@@ -23,7 +23,7 @@ class LDGAME_API ALDCharacterSpawnActor : public AActor
 public:	
 	ALDCharacterSpawnActor();
 
-	void SpawnHeroCharacterActor(TSoftClassPtr<ALDHeroCharacter> HeroCharacter);
+	void SpawnHeroCharacterActor(TSoftClassPtr<ALDCharacterHero> HeroCharacter);
 
 public:
 

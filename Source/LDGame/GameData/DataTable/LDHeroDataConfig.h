@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
-#include "Character/Hero/LDHeroCharacter.h"
+//#include "Character/Hero/LDHeroCharacter.h"
 #include "LDHeroDataConfig.generated.h"
+
+class ALDCharacterHero;
 
 USTRUCT(BlueprintType)
 struct FLDXiuShiHeroDataConfig : public FTableRowBase
@@ -21,5 +23,5 @@ struct FLDXiuShiHeroDataConfig : public FTableRowBase
 
 	//-------------------------------------Pawn-------------------------------------
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="XiuShiPawn")
-	TSoftClassPtr<ALDHeroCharacter> XiuShiHeroPawn;
+	TSoftClassPtr<ALDCharacterHero> XiuShiHeroPawn;
 };

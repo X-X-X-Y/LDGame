@@ -2,8 +2,7 @@
 
 
 #include "LevelActor/LDCharacterSpawnActor.h"
-
-#include "Character/Hero/LDHeroCharacter.h"
+#include "Character/Hero/LDCharacterHero.h"
 #include "GameDevUtil/LDLogChannels.h"
 
 ALDCharacterSpawnActor::ALDCharacterSpawnActor()
@@ -20,17 +19,18 @@ void ALDCharacterSpawnActor::BeginPlay()
 
 #pragma region Spawn Character Actor
 
-void ALDCharacterSpawnActor::SpawnHeroCharacterActor(TSoftClassPtr<ALDHeroCharacter> HeroCharacter)
+void ALDCharacterSpawnActor::SpawnHeroCharacterActor(TSoftClassPtr<ALDCharacterHero> HeroCharacter)
 {
 	if (HeroCharacter == nullptr)
 	{
 		UE_LOG(LogLDCharacter, Type::Error, TEXT("HeroCharacter is nullptr"));
-		return;
+	return;
 	}
 
 	if (UWorld* World = GetWorld(); bHasSpawnedHero == false && World)
 	{
-		World->SpawnActor<ALDHeroCharacter>(HeroCharacter.Get(), this->GetActorLocation(), this->GetActorRotation());
+		//TODO:需要改进生成策略
+		World->SpawnActor<ALDCharacterHero>(HeroCharacter.Get(), this->GetActorLocation(), this->GetActorRotation());
 	}
 }
 
