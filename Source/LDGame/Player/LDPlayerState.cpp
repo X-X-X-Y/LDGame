@@ -3,7 +3,7 @@
 
 #include "Player/LDPlayerState.h"
 
-#include "Character/Abilities/LDAbilitySystemComponent.h"
+#include "Character/AbilitySystem/LDAbilitySystemComponent.h"
 
 ALDPlayerState::ALDPlayerState()
 {

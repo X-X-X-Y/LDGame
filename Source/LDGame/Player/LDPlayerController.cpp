@@ -4,7 +4,7 @@
 #include "LDPlayerController.h"
 
 #include "LDPlayerState.h"
-#include "Character/Abilities/LDAbilitySystemComponent.h"
+#include "Character/AbilitySystem/LDAbilitySystemComponent.h"
 
 ALDPlayerState* ALDPlayerController::GetLDPlayerState() const
 {

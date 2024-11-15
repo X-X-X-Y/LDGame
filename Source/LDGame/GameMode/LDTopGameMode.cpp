@@ -55,12 +55,6 @@ void ALDTopGameMode::SpawnHeroActors(const FDataRegistryAcquireResult& VehListHa
 	}
 }
 
-
-TArray<ALDCharacterHero*> ALDTopGameMode::GetCurrentHeroActors()
-{
-	return CurrentHeroActorList;
-}
-
 void ALDTopGameMode::AddNewHeroInList(ALDCharacterHero* HeroActor)
 {
 	if (HeroActor)
@@ -68,5 +62,16 @@ void ALDTopGameMode::AddNewHeroInList(ALDCharacterHero* HeroActor)
 		CurrentHeroActorList.AddUnique(HeroActor);
 	}
 }
+
+TArray<ALDCharacterHero*> ALDTopGameMode::GetCurrentHeroActors()
+{
+	return CurrentHeroActorList;
+}
+
+ALDCharacterHero* ALDTopGameMode::GetSelectHeroActor()
+{
+	return CurrentHeroActorList[CurrentHeroActorIndex];
+}
+
 
 #pragma endregion

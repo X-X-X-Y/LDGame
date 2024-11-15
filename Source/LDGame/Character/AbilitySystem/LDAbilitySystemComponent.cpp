@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Character/Abilities/LDAbilitySystemComponent.h"
+#include "Character/AbilitySystem/LDAbilitySystemComponent.h"
 
 #include "LDGameplayAbility.h"
 

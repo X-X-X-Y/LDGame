@@ -20,8 +20,9 @@ public:
 	
 	ALDTopGameMode();
 
-	TArray<ALDCharacterHero*> GetCurrentHeroActors();
 	void AddNewHeroInList(ALDCharacterHero* HeroActor); 
+	TArray<ALDCharacterHero*> GetCurrentHeroActors();
+	ALDCharacterHero* GetSelectHeroActor();
 
 protected:
 	virtual void BeginPlay() override;
@@ -32,4 +33,5 @@ private:
 
 private:
 	TArray<ALDCharacterHero*> CurrentHeroActorList;
+	int CurrentHeroActorIndex = 0;
 };
