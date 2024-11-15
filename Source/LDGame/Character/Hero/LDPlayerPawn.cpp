@@ -5,8 +5,8 @@
 
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
-#include "Character/Abilities/LDAbilitySet.h"
-#include "Character/Abilities/LDAbilitySystemComponent.h"
+#include "Character/AbilitySystem//LDAbilitySet.h"
+#include "Character/AbilitySystem/LDAbilitySystemComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameDevUtil/LDGameplayTags.h"
 #include "GameDevUtil/LDLogChannels.h"
