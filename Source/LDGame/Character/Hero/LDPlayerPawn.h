@@ -7,6 +7,7 @@
 #include "LDGame/Character/LDCharacterBase.h"
 #include "LDPlayerPawn.generated.h"
 
+class ULDAbilitySet;
 class UFloatingPawnMovement;
 class USphereComponent;
 struct FInputActionValue;
@@ -26,9 +27,11 @@ public:
 	
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	virtual void PossessedBy(AController* NewController) override;
 protected:
 	virtual void BeginPlay() override;
+	// Client only.
+	virtual void OnRep_PlayerState() override;
 	
 	void InputAbilityInputTagPressed(FGameplayTag InputTag);
 	void InputAbilityInputTagReleased(FGameplayTag InputTag);
@@ -67,10 +70,15 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LDGame|Zoom")
 	UFloatingPawnMovement* PlayerPawnMovement;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LDGame|Abilities")
+	ULDAbilitySet* AbilitySet;
 	
 	FTimerHandle MoveTrackingTimerHandle;
 
 	USceneComponent* PlayerPawnRoot;
+	
+	TWeakObjectPtr<class ULDAbilitySystemComponent> AbilitySystemComponent;
 
 private:
 	

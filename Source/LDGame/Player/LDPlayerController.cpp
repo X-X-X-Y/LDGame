@@ -28,7 +28,7 @@ void ALDPlayerController::PostProcessInput(const float DeltaTime, const bool bGa
 {
 	if(ULDAbilitySystemComponent* ASC = GetISAbilitySystemComponent())
 	{
-		// ASC->ProcessAbilityInput(DeltaTime, bGamePaused);
+		ASC->ProcessAbilityInput(DeltaTime, bGamePaused);
 	}
 	
 	Super::PostProcessInput(DeltaTime, bGamePaused);

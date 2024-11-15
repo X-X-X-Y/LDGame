@@ -5,15 +5,17 @@
 
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
+#include "Character/Abilities/LDAbilitySet.h"
+#include "Character/Abilities/LDAbilitySystemComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameDevUtil/LDGameplayTags.h"
 #include "GameDevUtil/LDLogChannels.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Input/LDInputComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Player/LDPlayerController.h"
+#include "Player/LDPlayerState.h"
 
 
 ALDPlayerPawn::ALDPlayerPawn()
@@ -37,6 +39,39 @@ ALDPlayerPawn::ALDPlayerPawn()
 }
 
 #pragma region UR Behaviour
+
+void ALDPlayerPawn::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	// AbilitySystemComponent
+	ALDPlayerState* PS = Cast<ALDPlayerState>(GetPlayerState());
+	check(PS);
+
+	AbilitySystemComponent = Cast<ULDAbilitySystemComponent>(PS->GetAbilitySystemComponent());
+	AbilitySystemComponent->InitAbilityActorInfo(PS,this);
+
+	if(AbilitySet)
+	{
+		AbilitySet->GiveToAbilitySystem(AbilitySystemComponent.Get(), nullptr, this);
+	}
+}
+
+void ALDPlayerPawn::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	ALDPlayerState* PS = Cast<ALDPlayerState>(GetPlayerState());
+	check(PS);
+
+	AbilitySystemComponent = Cast<ULDAbilitySystemComponent>(PS->GetAbilitySystemComponent());
+	PS->GetAbilitySystemComponent()->InitAbilityActorInfo(PS,this);
+
+	if(AbilitySet)
+	{
+		AbilitySet->GiveToAbilitySystem(AbilitySystemComponent.Get(), nullptr, this);
+	}
+}
 
 void ALDPlayerPawn::BeginPlay()
 {
@@ -83,13 +118,15 @@ void ALDPlayerPawn::SetupPlayerInputComponent(class UInputComponent* PlayerInput
 	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_DMove, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerDragMove);
 }
 
+//这里绑定技能输入的InputTag
 void ALDPlayerPawn::InputAbilityInputTagPressed(FGameplayTag InputTag)
 {
-	
+	AbilitySystemComponent->AbilityInputTagPressed(InputTag);
 }
 
 void ALDPlayerPawn::InputAbilityInputTagReleased(FGameplayTag InputTag)
 {
+	AbilitySystemComponent->AbilityInputTagReleased(InputTag);
 }
 #pragma region Player Native Input
 
