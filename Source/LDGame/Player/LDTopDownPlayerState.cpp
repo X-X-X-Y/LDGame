@@ -11,14 +11,4 @@ ALDTopDownPlayerState::ALDTopDownPlayerState()
 	
 }
 
-EPlayerSelectState ALDTopDownPlayerState::GetPlayerSelectState() const
-{
-	return PlayerSelectState;
-}
-
-void ALDTopDownPlayerState::SetPlayerSelectState(EPlayerSelectState NewState)
-{
-	PlayerSelectState = NewState;
-}
-
 

@@ -10,9 +10,13 @@
 
 class ULDAbilitySystemComponent;
 
-/**
- * 
- */
+UENUM(BlueprintType)
+enum class EPlayerSelectState : uint8
+{
+	OnSelectHero,
+	OnSelectNone
+};
+
 UCLASS()
 class LDGAME_API ALDPlayerState : public APlayerState, public IAbilitySystemInterface
 {
@@ -24,6 +28,11 @@ public:
 
 	UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
+	EPlayerSelectState GetPlayerSelectState() const;
+	void SetPlayerSelectState(EPlayerSelectState NewState);
+	
+private:
+	EPlayerSelectState PlayerSelectState = EPlayerSelectState::OnSelectNone;
 protected:
 	UPROPERTY()
 	ULDAbilitySystemComponent* AbilitySystemComponent;

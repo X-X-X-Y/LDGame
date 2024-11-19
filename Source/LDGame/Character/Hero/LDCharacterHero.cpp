@@ -25,67 +25,15 @@ void ALDCharacterHero::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	// AbilitySystemComponent
-	ALDPlayerState* PS = Cast<ALDPlayerState>(GetPlayerState());
-	check(PS);
-
-	AbilitySystemComponent = Cast<ULDAbilitySystemComponent>(PS->GetAbilitySystemComponent());
-	AbilitySystemComponent->InitAbilityActorInfo(PS,this);
-
-	if(AbilitySet)
-	{
-		AbilitySet->GiveToAbilitySystem(AbilitySystemComponent.Get(), nullptr, this);
-	}
-
-	if(ALDPlayerController* PC = Cast<ALDPlayerController>(NewController))
-	{
-		if(UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(HeroMappingContext, 0);
-		}
-	}
 }
 
 void ALDCharacterHero::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
-	//绑定技能输入
-	ULDInputComponent* LDInputComponent = Cast<ULDInputComponent>(PlayerInputComponent);
-	check(LDInputComponent);
-
-	TArray<uint32> BindHandles;
-	LDInputComponent->BindAbilityActions(HeroInputConfig, this, &ThisClass::InputAbilityInputTagPressed,
-	&ThisClass::InputAbilityInputTagReleased, /*out*/ BindHandles);
-
-	// 基本输入
-	LDInputComponent->BindNativeAction(HeroInputConfig, LDGameplayTags::InputTag_Hero_Move, ETriggerEvent::Started,
-	                                   this, &ThisClass::OnInputStarted);
-	LDInputComponent->BindNativeAction(HeroInputConfig, LDGameplayTags::InputTag_Hero_Move, ETriggerEvent::Triggered,
-	                                   this,
-	                                   &ThisClass::OnSetDestinationTriggered);
-	LDInputComponent->BindNativeAction(HeroInputConfig, LDGameplayTags::InputTag_Hero_Move, ETriggerEvent::Completed,
-	                                   this,
-	                                   &ThisClass::OnSetDestinationReleased);
-	LDInputComponent->BindNativeAction(HeroInputConfig, LDGameplayTags::InputTag_Hero_Move, ETriggerEvent::Canceled,
-	                                   this,
-	                                   &ThisClass::OnSetDestinationReleased);
-	LDInputComponent->BindNativeAction(HeroInputConfig, LDGameplayTags::InputTag_Player_HSelect, ETriggerEvent::Started,
-	                                   this, &ThisClass::OnHeroCancelSelect);
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
 #pragma endregion
 
-#pragma region GAS Input
-void ALDCharacterHero::InputAbilityInputTagPressed(FGameplayTag InputTag)
-{
-	AbilitySystemComponent->AbilityInputTagPressed(InputTag);
-}
-
-void ALDCharacterHero::InputAbilityInputTagReleased(FGameplayTag InputTag)
-{
-	AbilitySystemComponent->AbilityInputTagReleased(InputTag);
-}
-
-#pragma endregion
 
 #pragma region Natvie Input
 
@@ -139,7 +87,7 @@ void ALDCharacterHero::OnSetDestinationReleased(const FInputActionValue& Value)
 void ALDCharacterHero::OnHeroCancelSelect(const FInputActionValue& Value)
 {
 	//再次按空格,PlayControl回到玩家Pawn,停止操控
-	ALDTopDownPlayerController* PC = Cast<ALDTopDownPlayerController>(GetController());
+	ALDPlayerController* PC = Cast<ALDPlayerController>(GetController());
 	if (PC)
 	{
 		PC->OnPlayerSelectChange.Broadcast(EPlayerSelectState::OnSelectNone);
@@ -147,11 +95,3 @@ void ALDCharacterHero::OnHeroCancelSelect(const FInputActionValue& Value)
 }
 
 #pragma endregion
-
-
-
-
-ULDAbilitySystemComponent* ALDCharacterHero::GetAbilitySystemComponent() const
-{
-	return AbilitySystemComponent.Get();
-}

@@ -24,3 +24,13 @@ UAbilitySystemComponent* ALDPlayerState::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;
 }
+
+EPlayerSelectState ALDPlayerState::GetPlayerSelectState() const
+{
+	return PlayerSelectState;
+}
+
+void ALDPlayerState::SetPlayerSelectState(EPlayerSelectState NewState)
+{
+	PlayerSelectState = NewState;
+}

@@ -6,7 +6,7 @@
 #include "Player/LDPlayerController.h"
 #include "LDTopDownPlayerController.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLDPlayerSelectChange, const EPlayerSelectState, NewState);
+
 
 enum class EPlayerSelectState : uint8;
 class ULDInputConfig;
@@ -22,22 +22,5 @@ class LDGAME_API ALDTopDownPlayerController : public ALDPlayerController
 public:
 	ALDTopDownPlayerController();
 
-	UFUNCTION(BlueprintCallable, Category = "LDGame")
-	void OnPlayerSelectHeroChange(EPlayerSelectState NewState);
-	
-protected:
-	virtual void BeginPlay() override;
 
-public:
-	FLDPlayerSelectChange OnPlayerSelectChange;
-
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LDGame|Input")
-	class UInputMappingContext* PCMappingContext;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LDGame|Input")
-	ULDInputConfig* InputConfig;
-	
-private:
-	TSoftObjectPtr<ALDPlayerPawn> CurrentPlayerPawn;
 };
