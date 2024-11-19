@@ -70,6 +70,10 @@ TArray<ALDCharacterHero*> ALDTopGameMode::GetCurrentHeroActors()
 
 ALDCharacterHero* ALDTopGameMode::GetSelectHeroActor()
 {
+	if (CurrentHeroActorList.Num() == 0)
+	{
+		return nullptr;
+	}
 	return CurrentHeroActorList[CurrentHeroActorIndex];
 }
 

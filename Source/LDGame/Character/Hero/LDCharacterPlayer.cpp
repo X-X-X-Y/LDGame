@@ -45,6 +45,7 @@ void ALDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 	// LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_Spin, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerSpin);
 	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_Zoom, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerZoom);
 	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_Select, ETriggerEvent::Started, this, &ThisClass::OnPlayerSelect);
+	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_Select, ETriggerEvent::Completed, this, &ThisClass::OnPlayerSelectComplete);
 	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_DMove, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerDragMove);
 	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_HSelect, ETriggerEvent::Started, this, &ThisClass::OnPlayerHeroSelect);
 }
@@ -105,6 +106,12 @@ void ALDCharacterPlayer::OnPlayerSelect(const FInputActionValue& InputValue)
 {
 	//鼠标点击后获取在平面上的坐标
 	MouseToGroundPlane(TargetHandle, bIsMousePos);
+	bIsLeftMouseButtonDown = true;
+}
+
+void ALDCharacterPlayer::OnPlayerSelectComplete(const FInputActionValue& InputValue)
+{
+	bIsLeftMouseButtonDown = false;
 }
 
 void ALDCharacterPlayer::OnPlayerSpin(const FInputActionValue& Value)
@@ -122,6 +129,10 @@ void ALDCharacterPlayer::OnPlayerZoom(const FInputActionValue& InputValue)
 
 void ALDCharacterPlayer::OnPlayerDragMove(const FInputActionValue& InputValue)
 {
+	if (!bIsLeftMouseButtonDown)
+	{
+		return;
+	}
 	//拖动移动
 	FVector CurrentPos;
 	MouseToGroundPlane(CurrentPos, bIsMousePos);

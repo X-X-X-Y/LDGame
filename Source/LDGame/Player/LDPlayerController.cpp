@@ -65,6 +65,13 @@ void ALDPlayerController::OnPlayerSelectHeroChange(EPlayerSelectState NewState)
 		return;
 	}
 
+	ALDCharacterHero* SelectHero = LDGameMode->GetSelectHeroActor();
+	if (!IsValid(SelectHero) || SelectHero == nullptr)
+	{
+		//当前场景没有有效的Hero可以选择
+		return;
+	}
+
 	if (CurrentPlayerPawn.Get() == nullptr)
 	{
 		CurrentPlayerPawn = Cast<ALDCharacterPlayer>(GetPawn());
@@ -75,16 +82,12 @@ void ALDPlayerController::OnPlayerSelectHeroChange(EPlayerSelectState NewState)
 	case EPlayerSelectState::OnSelectHero:
 		if (PS->GetPlayerSelectState() == EPlayerSelectState::OnSelectNone)
 		{
-			ALDCharacterHero* SelectHero = LDGameMode->GetSelectHeroActor();
-			if (SelectHero)
-			{
-				Possess(SelectHero);
-				SetViewTarget(CurrentPlayerPawn.Get());
-				CurrentPlayerPawn.Get()->SetActorLocation(SelectHero->GetActorLocation());
-				CurrentPlayerPawn.Get()->FollowCharacterHero(SelectHero->GetActorLocation());
-				PS->SetPlayerSelectState(EPlayerSelectState::OnSelectHero);
-				UE_LOG(LogLD, Log, TEXT("OnPlayerSelectHero"));
-			}
+			Possess(SelectHero);
+			SetViewTarget(CurrentPlayerPawn.Get());
+			CurrentPlayerPawn.Get()->SetActorLocation(SelectHero->GetActorLocation());
+			CurrentPlayerPawn.Get()->FollowCharacterHero(SelectHero->GetActorLocation());
+			PS->SetPlayerSelectState(EPlayerSelectState::OnSelectHero);
+			UE_LOG(LogLD, Log, TEXT("OnPlayerSelectHero"));
 		}
 		break;
 	case EPlayerSelectState::OnSelectNone:

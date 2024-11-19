@@ -34,6 +34,7 @@ protected:
 	
 	void OnPlayerMove(const FInputActionValue& InputValue);
 	void OnPlayerSelect(const FInputActionValue& InputValue);
+	void OnPlayerSelectComplete(const FInputActionValue& InputValue);
 	void OnPlayerSpin(const FInputActionValue& Value);
 	void OnPlayerZoom(const FInputActionValue& InputValue);
 	void OnPlayerDragMove(const FInputActionValue& InputValue);
@@ -80,4 +81,5 @@ private:
 	FVector TargetHandle = FVector::ZeroVector;
 	bool bIsMousePos = false;
 	EPlayerSelectState CurrentSelectState = EPlayerSelectState::OnSelectNone;
+	bool bIsLeftMouseButtonDown = false;
 };
