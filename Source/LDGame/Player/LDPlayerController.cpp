@@ -8,7 +8,6 @@
 #include "Character/AbilitySystem/LDAbilitySystemComponent.h"
 #include "Character/Hero/LDCharacterHero.h"
 #include "Character/Hero/LDCharacterPlayer.h"
-#include "Character/Hero/LDPlayerPawn.h"
 #include "GameDevUtil/LDLogChannels.h"
 #include "GameMode/LDTopGameMode.h"
 
@@ -81,6 +80,8 @@ void ALDPlayerController::OnPlayerSelectHeroChange(EPlayerSelectState NewState)
 			{
 				Possess(SelectHero);
 				SetViewTarget(CurrentPlayerPawn.Get());
+				CurrentPlayerPawn.Get()->SetActorLocation(SelectHero->GetActorLocation());
+				CurrentPlayerPawn.Get()->FollowCharacterHero(SelectHero->GetActorLocation());
 				PS->SetPlayerSelectState(EPlayerSelectState::OnSelectHero);
 				UE_LOG(LogLD, Log, TEXT("OnPlayerSelectHero"));
 			}

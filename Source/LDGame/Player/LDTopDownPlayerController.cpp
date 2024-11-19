@@ -6,7 +6,6 @@
 #include "EnhancedInputSubsystems.h"
 #include "LDTopDownPlayerState.h"
 #include "Character/Hero/LDCharacterHero.h"
-#include "Character/Hero/LDPlayerPawn.h"
 #include "GameDevUtil/LDGameplayTags.h"
 #include "GameDevUtil/LDLogChannels.h"
 #include "GameMode/LDTopGameMode.h"

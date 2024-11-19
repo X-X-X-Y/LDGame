@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Character/LDCharacterBase.h"
+#include "Player/LDPlayerState.h"
 #include "LDCharacterPlayer.generated.h"
 
+enum class EPlayerSelectState : uint8;
 struct FInputActionValue;
 class UFloatingPawnMovement;
 class USphereComponent;
@@ -24,6 +26,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void PossessedBy(AController* NewController) override;
+
+	void FollowCharacterHero(FVector HeroLocation);
 	
 protected:
 	virtual void BeginPlay() override;
@@ -75,4 +79,5 @@ private:
 	float ZoomDirection;
 	FVector TargetHandle = FVector::ZeroVector;
 	bool bIsMousePos = false;
+	EPlayerSelectState CurrentSelectState = EPlayerSelectState::OnSelectNone;
 };

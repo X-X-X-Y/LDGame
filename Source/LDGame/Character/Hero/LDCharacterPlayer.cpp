@@ -52,6 +52,8 @@ void ALDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 void ALDCharacterPlayer::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
+
+	CurrentSelectState = EPlayerSelectState::OnSelectNone;
 }
 
 void ALDCharacterPlayer::BeginPlay()
@@ -143,6 +145,7 @@ void ALDCharacterPlayer::OnPlayerHeroSelect(const FInputActionValue& InputValue)
 	ALDPlayerController* PC = Cast<ALDPlayerController>(GetController());
 	if (PC)
 	{
+		CurrentSelectState = EPlayerSelectState::OnSelectHero;
 		PC->OnPlayerSelectChange.Broadcast(EPlayerSelectState::OnSelectHero);
 	}
 }
@@ -223,6 +226,12 @@ void ALDCharacterPlayer::MoveTracking()
 		UE_LOG(LogLDCharacter, Error, TEXT("CapsuleComp is nullptr!"));
 		return;
 	}
+
+	if (CurrentSelectState == EPlayerSelectState::OnSelectHero)
+	{
+		return;
+	}
+	
 	CurrentTargetPos += FVector(0, 0, 10);
 	PlayerCursorCollision->SetWorldLocation(CurrentTargetPos,false);
 	
@@ -237,6 +246,12 @@ void ALDCharacterPlayer::MoveTracking()
 		FTransform CursorNewTransform = UKismetMathLibrary::TInterpTo(PlayerCursorMesh->GetComponentTransform(),CursorTargetTransform,DeltaTime,12.0);
 		PlayerCursorMesh->SetWorldTransform(CursorNewTransform);
 	}
+}
+
+void ALDCharacterPlayer::FollowCharacterHero(FVector HeroLocation)
+{
+	PlayerCursorMesh->SetWorldLocation(HeroLocation);
+	PlayerCursorCollision->SetWorldLocation(HeroLocation);
 }
 
 #pragma endregion

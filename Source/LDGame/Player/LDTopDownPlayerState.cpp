@@ -3,8 +3,6 @@
 
 #include "Player/LDTopDownPlayerState.h"
 
-#include "Character/Hero/LDPlayerPawn.h"
-
 
 ALDTopDownPlayerState::ALDTopDownPlayerState()
 {
