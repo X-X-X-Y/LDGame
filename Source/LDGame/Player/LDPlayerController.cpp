@@ -89,6 +89,7 @@ void ALDPlayerController::OnPlayerSelectHeroChange(EPlayerSelectState NewState)
 		break;
 	case EPlayerSelectState::OnSelectNone:
 		Possess(CurrentPlayerPawn.Get());
+		PS->SetPlayerSelectState(EPlayerSelectState::OnSelectNone);
 		UE_LOG(LogLD, Log, TEXT("On Player Cancel Hero"));
 		break;
 	}

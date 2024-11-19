@@ -25,11 +25,28 @@ void ALDCharacterHero::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
+	//Input
+	if(ALDPlayerController* PC = Cast<ALDPlayerController>(GetController()))
+	{
+		if(UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
+		{
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
+	}
 }
 
 void ALDCharacterHero::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	
+	ULDInputComponent* LDInputComponent = Cast<ULDInputComponent>(PlayerInputComponent);
+	check(LDInputComponent);
+
+	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Hero_Move, ETriggerEvent::Started, this, &ThisClass::OnInputStarted);
+	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Hero_Move, ETriggerEvent::Triggered, this, &ThisClass::OnSetDestinationTriggered);
+	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Hero_Move, ETriggerEvent::Completed, this, &ThisClass::OnSetDestinationReleased);
+	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Hero_Move, ETriggerEvent::Canceled, this, &ThisClass::OnSetDestinationReleased);
+	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_HSelect, ETriggerEvent::Started, this, &ThisClass::OnHeroCancelSelect);
 }
 
 #pragma endregion
@@ -90,6 +107,7 @@ void ALDCharacterHero::OnHeroCancelSelect(const FInputActionValue& Value)
 	ALDPlayerController* PC = Cast<ALDPlayerController>(GetController());
 	if (PC)
 	{
+		AddMovementInput(CachedDestination, 1.0, false);
 		PC->OnPlayerSelectChange.Broadcast(EPlayerSelectState::OnSelectNone);
 	}
 }
