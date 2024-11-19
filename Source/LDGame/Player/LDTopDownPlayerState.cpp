@@ -3,18 +3,22 @@
 
 #include "Player/LDTopDownPlayerState.h"
 
+#include "Character/Hero/LDPlayerPawn.h"
+
 
 ALDTopDownPlayerState::ALDTopDownPlayerState()
 {
-	bHasSelectHero = false;
+	
 }
 
-bool ALDTopDownPlayerState::CheckHasSelectHero() const
+EPlayerSelectState ALDTopDownPlayerState::GetPlayerSelectState() const
 {
-	return bHasSelectHero;
+	return PlayerSelectState;
 }
 
-void ALDTopDownPlayerState::SetHasSelectHero(bool NewBoolValue)
+void ALDTopDownPlayerState::SetPlayerSelectState(EPlayerSelectState NewState)
 {
-	bHasSelectHero = NewBoolValue;
+	PlayerSelectState = NewState;
 }
+
+

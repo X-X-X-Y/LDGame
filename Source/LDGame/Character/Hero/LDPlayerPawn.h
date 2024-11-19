@@ -41,6 +41,7 @@ protected:
 	void OnPlayerSpin(const FInputActionValue& Value);
 	void OnPlayerZoom(const FInputActionValue& InputValue);
 	void OnPlayerDragMove(const FInputActionValue& InputValue);
+	void OnPlayerHeroSelect(const FInputActionValue& InputValue);
 
 	void UpdatePlayerViewZoom();
 
@@ -73,10 +74,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LDGame|Abilities")
 	ULDAbilitySet* AbilitySet;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "LDGame|Game")
+	USceneComponent* PlayerPawnRoot;
 	
 	FTimerHandle MoveTrackingTimerHandle;
 
-	USceneComponent* PlayerPawnRoot;
 	
 	TWeakObjectPtr<class ULDAbilitySystemComponent> AbilitySystemComponent;
 

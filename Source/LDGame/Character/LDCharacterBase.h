@@ -6,6 +6,9 @@
 #include "GameFramework/Character.h"
 #include "LDCharacterBase.generated.h"
 
+class ULDAbilitySystemComponent;
+class ULDAbilitySet;
+
 UCLASS()
 class LDGAME_API ALDCharacterBase : public ACharacter
 {
@@ -13,5 +16,4 @@ class LDGAME_API ALDCharacterBase : public ACharacter
 
 public:
 	ALDCharacterBase();
-	
 };

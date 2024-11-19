@@ -4,6 +4,7 @@
 #include "LDPlayerPawn.h"
 
 #include "EnhancedInputSubsystems.h"
+#include "LDCharacterHero.h"
 #include "Camera/CameraComponent.h"
 #include "Character/AbilitySystem//LDAbilitySet.h"
 #include "Character/AbilitySystem/LDAbilitySystemComponent.h"
@@ -12,10 +13,13 @@
 #include "GameDevUtil/LDLogChannels.h"
 #include "GameFramework/FloatingPawnMovement.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameMode/LDTopGameMode.h"
 #include "Input/LDInputComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Player/LDPlayerController.h"
 #include "Player/LDPlayerState.h"
+#include "Player/LDTopDownPlayerController.h"
+#include "Player/LDTopDownPlayerState.h"
 
 
 ALDPlayerPawn::ALDPlayerPawn()
@@ -116,6 +120,7 @@ void ALDPlayerPawn::SetupPlayerInputComponent(class UInputComponent* PlayerInput
 	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_Zoom, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerZoom);
 	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_Select, ETriggerEvent::Started, this, &ThisClass::OnPlayerSelect);
 	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_DMove, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerDragMove);
+	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_HSelect, ETriggerEvent::Started, this, &ThisClass::OnPlayerHeroSelect);
 }
 
 //这里绑定技能输入的InputTag
@@ -188,6 +193,15 @@ void ALDPlayerPawn::OnPlayerDragMove(const FInputActionValue& InputValue)
 	FVector StoredMove = TargetHandle - CurrentPos - IntersectionVector;
 
 	AddActorWorldOffset(FVector(StoredMove.X, StoredMove.Y, 0));
+}
+
+void ALDPlayerPawn::OnPlayerHeroSelect(const FInputActionValue& InputValue)
+{
+	ALDTopDownPlayerController* PC = Cast<ALDTopDownPlayerController>(GetController());
+	if (PC)
+	{
+		PC->OnPlayerSelectChange.Broadcast(EPlayerSelectState::OnSelectHero);
+	}
 }
 
 #pragma endregion

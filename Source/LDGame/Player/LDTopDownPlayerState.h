@@ -6,9 +6,14 @@
 #include "Player/LDPlayerState.h"
 #include "LDTopDownPlayerState.generated.h"
 
-/**
- * 
- */
+
+UENUM(BlueprintType)
+enum class EPlayerSelectState : uint8
+{
+	OnSelectHero,
+	OnSelectNone
+};
+
 UCLASS()
 class LDGAME_API ALDTopDownPlayerState : public ALDPlayerState
 {
@@ -16,10 +21,10 @@ class LDGAME_API ALDTopDownPlayerState : public ALDPlayerState
 
 public:
 	ALDTopDownPlayerState();
-	
-	bool CheckHasSelectHero() const;
-	void SetHasSelectHero(bool NewBoolValue);
+
+	EPlayerSelectState GetPlayerSelectState() const;
+	void SetPlayerSelectState(EPlayerSelectState NewState);
 	
 private:
-	bool bHasSelectHero;
+	EPlayerSelectState PlayerSelectState = EPlayerSelectState::OnSelectNone;
 };
