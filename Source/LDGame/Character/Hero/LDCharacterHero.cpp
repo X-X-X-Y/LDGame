@@ -7,6 +7,7 @@
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "Character/AbilitySystem/LDAbilitySet.h"
 #include "Character/AbilitySystem/LDAbilitySystemComponent.h"
+#include "Components/SphereComponent.h"
 #include "GameDevUtil/LDGameplayTags.h"
 #include "Input/LDInputComponent.h"
 #include "Player/LDPlayerController.h"
@@ -19,6 +20,9 @@
 void ALDCharacterHero::BeginPlay()
 {
 	Super::BeginPlay();
+
+	ViewCursorCollision->SetVisibility(false);
+	ViewCursorMesh->SetVisibility(false);
 }
 
 void ALDCharacterHero::PossessedBy(AController* NewController)

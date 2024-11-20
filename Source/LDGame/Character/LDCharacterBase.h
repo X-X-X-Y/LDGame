@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "LDCharacterBase.generated.h"
 
+class USphereComponent;
 struct FGameplayTag;
 class ULDInputConfig;
 class ULDAbilitySystemComponent;
@@ -23,10 +24,15 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void PossessedBy(AController* NewController) override;
 
+	void SetCurrentCursorPosition(const FVector& TargetPos) const;
+	void DragCharacterPosition(const FVector& TargetHandle);
+	void UpdateCharacterViewZoom(float ZoomDirection);
+
 protected:
 	virtual void BeginPlay() override;
 	// Client only.
 	virtual void OnRep_PlayerState() override;
+	virtual void OnZoomValueChanged();
 	
 	void InputAbilityInputTagPressed(FGameplayTag InputTag);
 	void InputAbilityInputTagReleased(FGameplayTag InputTag);
@@ -42,6 +48,25 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LDGame|Abilities")
 	ULDAbilitySet* AbilitySet;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "LDGame|View")
+	UStaticMeshComponent* ViewCursorMesh;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "LDGame|View")
+	USphereComponent* ViewCursorCollision;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LDGame|View")
+	UCurveFloat* ZoomCurve;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LDGame|View")
+	float ZoomValue;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class UCameraComponent* TopDownCameraComponent;
+	
+	/** Camera boom positioning the camera above the character */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class USpringArmComponent* CameraBoom;
+	
 	FTimerHandle MoveTrackingTimerHandle;
 	
 	TWeakObjectPtr<class ULDAbilitySystemComponent> AbilitySystemComponent;
