@@ -40,6 +40,13 @@ void ALDCharacterPlayer::OnZoomValueChanged()
 	}
 }
 
+void ALDCharacterPlayer::UpdateCursorPosition(FVector OffsetDirection)
+{
+	Super::UpdateCursorPosition(OffsetDirection);
+
+	AddActorWorldOffset(FVector(OffsetDirection.X, OffsetDirection.Y, 0));
+}
+
 void ALDCharacterPlayer::BeginPlay()
 {
 	Super::BeginPlay();

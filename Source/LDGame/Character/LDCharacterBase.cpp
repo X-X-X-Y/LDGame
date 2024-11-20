@@ -9,6 +9,7 @@
 #include "AbilitySystem/LDAbilitySystemComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SphereComponent.h"
+#include "GameDevUtil/LDLogChannels.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Input/LDInputComponent.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -52,6 +53,10 @@ void ALDCharacterBase::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
+	ViewCursorCollision->SetVisibility(true);
+	ViewCursorMesh->SetVisibility(true);
+	ViewCursorCollision->SetCollisionEnabled(ECollisionEnabled::Type::QueryOnly);
+
 	// AbilitySystemComponent
 	ALDPlayerState* PS = Cast<ALDPlayerState>(GetPlayerState());
 	check(PS);
@@ -63,6 +68,15 @@ void ALDCharacterBase::PossessedBy(AController* NewController)
 	{
 		AbilitySet->GiveToAbilitySystem(AbilitySystemComponent.Get(), nullptr, this);
 	}
+}
+
+void ALDCharacterBase::UnPossessed()
+{
+	Super::UnPossessed();
+
+	ViewCursorCollision->SetVisibility(false);
+	ViewCursorMesh->SetVisibility(false);
+	ViewCursorCollision->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 }
 
 void ALDCharacterBase::BeginPlay()
@@ -96,6 +110,10 @@ void ALDCharacterBase::OnRep_PlayerState()
 }
 
 void ALDCharacterBase::OnZoomValueChanged()
+{
+}
+
+void ALDCharacterBase::UpdateCursorPosition(FVector OffsetDirection)
 {
 }
 
@@ -161,12 +179,18 @@ void ALDCharacterBase::DragCharacterPosition(const FVector& TargetHandle)
 	FVector CameraBoomUp = CameraBoom->GetUpVector() * CameraBoom->SocketOffset.Z;
 	FVector IntersectionVector = (CameraBoomForward + CameraBoomUp + CameraBoomLocation) - CameraLocation;
 	FVector StoredMove = TargetHandle - CurrentPos - IntersectionVector;
-	
-	AddActorWorldOffset(FVector(StoredMove.X, StoredMove.Y, 0));
+
+	UpdateCursorPosition(FVector(StoredMove.X, StoredMove.Y, 0));
 }
 
 void ALDCharacterBase::UpdateCharacterViewZoom(float ZoomDirection)
 {
+	if (!IsValid(ZoomCurve))
+	{
+		UE_LOG(LogLDCharacter, Error, TEXT("Set ZoomCurve In BP!"))
+		return;
+	}
+	
 	//距离
 	ZoomValue = FMath::Clamp(ZoomDirection * 0.01 + ZoomValue,0.0,1.0);
 	CameraBoom->TargetArmLength = FMath::Lerp(800, 40000, ZoomCurve->GetFloatValue(ZoomValue));

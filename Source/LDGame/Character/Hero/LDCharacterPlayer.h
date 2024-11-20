@@ -28,6 +28,7 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnZoomValueChanged() override;
+	virtual void UpdateCursorPosition(FVector OffsetDirection) override;
 
 protected:
 	

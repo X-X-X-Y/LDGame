@@ -22,6 +22,8 @@ public:
 
 	template<class UserClass, typename PressedFuncType, typename ReleasedFuncType>
 	void BindAbilityActions(const ULDInputConfig* InputConfig, UserClass* Object, PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc, TArray<uint32>& BindHandles);
+
+	void RemoveBinds(TArray<uint32>& BindHandles);
 };
 
 template <class UserClass, typename FuncType>

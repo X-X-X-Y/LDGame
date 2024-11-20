@@ -18,6 +18,8 @@ class LDGAME_API ALDCharacterHero : public ALDCharacterBase
 	GENERATED_BODY()
 public:
 
+	ALDCharacterHero();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -26,13 +28,16 @@ protected:
 	void OnInputStarted(const FInputActionValue& InputValue);
 	void OnSetDestinationTriggered(const FInputActionValue& Value);
 	void OnSetDestinationReleased(const FInputActionValue& Value);
-	void OnHeroCancelSelect(const FInputActionValue& Value);
+	virtual void UpdateCursorPosition(FVector OffsetDirection) override;
 
 public:
 	/** Time Threshold to know if it was a short press */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LDGame|Input")
 	float ShortPressThreshold;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "LDGame|View")
+	UStaticMeshComponent* ViewFollowMesh;
+	
 private:
 	FVector CachedDestination;
 	float FollowTime;

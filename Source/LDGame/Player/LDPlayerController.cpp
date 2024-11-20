@@ -57,6 +57,7 @@ void ALDPlayerController::OnPossess(APawn* InPawn)
 	if(ALDCharacterBase* CharacterPawn = Cast<ALDCharacterBase>(InPawn); IsValid(CharacterPawn))
 	{
 		CharacterPawn->UpdateCharacterViewZoom(0.0f);
+		// SetPCNativeInput();
 	}
 }
 
@@ -70,14 +71,7 @@ void ALDPlayerController::SetupInputComponent()
 		Subsystem->AddMappingContext(PCMappingContext, 0);
 	}
 
-	if (ULDInputComponent* LDInputComponent = Cast<ULDInputComponent>(InputComponent))
-	{
-		LDInputComponent->BindNativeAction(PCInputConfig, LDGameplayTags::InputTag_Player_Move, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerMove);
-		LDInputComponent->BindNativeAction(PCInputConfig, LDGameplayTags::InputTag_Player_Zoom, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerZoom);
-		LDInputComponent->BindNativeAction(PCInputConfig, LDGameplayTags::InputTag_Player_Select, ETriggerEvent::Started, this, &ThisClass::OnPlayerSelect);
-		LDInputComponent->BindNativeAction(PCInputConfig, LDGameplayTags::InputTag_Player_Select, ETriggerEvent::Completed, this, &ThisClass::OnPlayerSelectComplete);
-		LDInputComponent->BindNativeAction(PCInputConfig, LDGameplayTags::InputTag_Player_DMove, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerDragMove);
-	}
+	SetPCNativeInput();
 }
 
 #pragma endregion
@@ -92,52 +86,34 @@ ULDAbilitySystemComponent* ALDPlayerController::GetLDAbilitySystemComponent() co
 
 void ALDPlayerController::OnPlayerSelectHeroChange(EPlayerSelectState NewState)
 {
-	ALDPlayerState* PS = GetPlayerState<ALDPlayerState>();
-	if (!IsValid(PS))
-	{
-		return;
-	}
-
-	ALDTopGameMode* LDGameMode = GetWorld()->GetAuthGameMode<ALDTopGameMode>();
-	if (!IsValid(LDGameMode))
-	{
-		UE_LOG(LogLD, Error, TEXT("Check GameMode and DefaultPawn!"))
-		return;
-	}
-
-	ALDCharacterHero* SelectHero = LDGameMode->GetSelectHeroActor();
-	if (!IsValid(SelectHero) || SelectHero == nullptr)
-	{
-		//当前场景没有有效的Hero可以选择
-		return;
-	}
-
-	if (CurrentPlayerPawn.Get() == nullptr)
-	{
-		CurrentPlayerPawn = Cast<ALDCharacterPlayer>(GetPawn());
-	}
-	
-	switch (NewState)
-	{
-	case EPlayerSelectState::OnSelectHero:
-		if (PS->GetPlayerSelectState() == EPlayerSelectState::OnSelectNone)
-		{
-			Possess(SelectHero);
-			SetViewTarget(CurrentPlayerPawn.Get());
-			CurrentPlayerPawn.Get()->SetActorLocation(SelectHero->GetActorLocation());
-			PS->SetPlayerSelectState(EPlayerSelectState::OnSelectHero);
-			UE_LOG(LogLD, Log, TEXT("OnPlayerSelectHero"));
-		}
-		break;
-	case EPlayerSelectState::OnSelectNone:
-		Possess(CurrentPlayerPawn.Get());
-		PS->SetPlayerSelectState(EPlayerSelectState::OnSelectNone);
-		UE_LOG(LogLD, Log, TEXT("On Player Cancel Hero"));
-		break;
-	}
 }
 
 #pragma endregion
+
+#pragma region PC Input Helper
+
+void ALDPlayerController::SetPCNativeInput()
+{
+	if (ULDInputComponent* LDInputComponent = Cast<ULDInputComponent>(InputComponent))
+	{
+		LDInputComponent->BindNativeAction(PCInputConfig, LDGameplayTags::InputTag_Player_Move, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerMove);
+		LDInputComponent->BindNativeAction(PCInputConfig, LDGameplayTags::InputTag_Player_Zoom, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerZoom);
+		LDInputComponent->BindNativeAction(PCInputConfig, LDGameplayTags::InputTag_Player_Select, ETriggerEvent::Started, this, &ThisClass::OnPlayerSelect);
+		LDInputComponent->BindNativeAction(PCInputConfig, LDGameplayTags::InputTag_Player_Select, ETriggerEvent::Completed, this, &ThisClass::OnPlayerSelectComplete);
+		LDInputComponent->BindNativeAction(PCInputConfig, LDGameplayTags::InputTag_Player_DMove, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerDragMove);
+		LDInputComponent->BindNativeAction(PCInputConfig, LDGameplayTags::InputTag_Player_HSelect, ETriggerEvent::Started, this, &ThisClass::OnHeroSelect);
+	}
+}
+
+void ALDPlayerController::ResetPCNativeInput()
+{
+}
+
+#pragma endregion
+
+
+
+#pragma region PC Native Input
 
 #pragma region Player View Functions
 
@@ -246,6 +222,55 @@ void ALDPlayerController::MoveTracking()
 	if (IsValid(CharacterPawn))
 	{
 		CharacterPawn->SetCurrentCursorPosition(CurrentTargetPos);
+	}
+}
+
+#pragma endregion
+
+void ALDPlayerController::OnHeroSelect(const FInputActionValue& InputValue)
+{
+	ALDPlayerState* PS = GetPlayerState<ALDPlayerState>();
+	if (!IsValid(PS))
+	{
+		return;
+	}
+
+	ALDTopGameMode* LDGameMode = GetWorld()->GetAuthGameMode<ALDTopGameMode>();
+	if (!IsValid(LDGameMode))
+	{
+		UE_LOG(LogLD, Error, TEXT("Check GameMode and DefaultPawn!"))
+		return;
+	}
+
+	ALDCharacterHero* SelectHero = LDGameMode->GetSelectHeroActor();
+	if (!IsValid(SelectHero) || SelectHero == nullptr)
+	{
+		//当前场景没有有效的Hero可以选择
+		return;
+	}
+
+	if (CurrentPlayerPawn.Get() == nullptr)
+	{
+		CurrentPlayerPawn = Cast<ALDCharacterPlayer>(GetPawn());
+	}
+
+	if (IsValid(CurrentPlayerPawn.Get()))
+	{
+		switch (PS->GetPlayerSelectState())
+		{
+		case EPlayerSelectState::OnSelectHero:
+			//选择修士->回到PlayerPawn上
+			Possess(CurrentPlayerPawn.Get());
+			PS->SetPlayerSelectState(EPlayerSelectState::OnSelectNone);
+			UE_LOG(LogLD, Log, TEXT("OnPlayerSelectHero"));
+			break;
+		case EPlayerSelectState::OnSelectNone:
+			//啥都不选择->选择修士状态
+			Possess(SelectHero);
+			PS->SetPlayerSelectState(EPlayerSelectState::OnSelectHero);
+			UE_LOG(LogLD, Log, TEXT("OnPlayerSelectHero"));
+			break;
+		}
 	}
 }
 

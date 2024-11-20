@@ -53,10 +53,13 @@ protected:
 	void OnPlayerZoom(const FInputActionValue& InputValue);
 	void OnPlayerDragMove(const FInputActionValue& InputValue);
 	void OnPlayerHeroSelect(const FInputActionValue& InputValue);
+	void OnHeroSelect(const FInputActionValue& InputValue);
+	
 
 private:
-
 	void MoveTracking();
+	void SetPCNativeInput();
+	void ResetPCNativeInput();
 	
 public:
 	FLDPlayerSelectChange OnPlayerSelectChange;

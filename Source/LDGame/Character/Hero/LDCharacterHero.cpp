@@ -9,6 +9,7 @@
 #include "Character/AbilitySystem/LDAbilitySystemComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameDevUtil/LDGameplayTags.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "Input/LDInputComponent.h"
 #include "Player/LDPlayerController.h"
 #include "Player/LDPlayerState.h"
@@ -16,6 +17,12 @@
 #include "Player/LDTopDownPlayerState.h"
 
 #pragma region ALDCharacter UEBeh
+
+ALDCharacterHero::ALDCharacterHero()
+{
+	ViewFollowMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TestMesh"));
+	CameraBoom->SetupAttachment(ViewFollowMesh);
+}
 
 void ALDCharacterHero::BeginPlay()
 {
@@ -34,9 +41,12 @@ void ALDCharacterHero::PossessedBy(AController* NewController)
 	{
 		if(UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
 		{
+			// Subsystem->ClearAllMappings();
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+	
+	UpdateCharacterViewZoom(0.0f);
 }
 
 void ALDCharacterHero::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -50,7 +60,6 @@ void ALDCharacterHero::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Hero_Move, ETriggerEvent::Triggered, this, &ThisClass::OnSetDestinationTriggered);
 	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Hero_Move, ETriggerEvent::Completed, this, &ThisClass::OnSetDestinationReleased);
 	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Hero_Move, ETriggerEvent::Canceled, this, &ThisClass::OnSetDestinationReleased);
-	LDInputComponent->BindNativeAction(InputConfig, LDGameplayTags::InputTag_Player_HSelect, ETriggerEvent::Started, this, &ThisClass::OnHeroCancelSelect);
 }
 
 #pragma endregion
@@ -105,15 +114,10 @@ void ALDCharacterHero::OnSetDestinationReleased(const FInputActionValue& Value)
 	FollowTime = 0.f;
 }
 
-void ALDCharacterHero::OnHeroCancelSelect(const FInputActionValue& Value)
+void ALDCharacterHero::UpdateCursorPosition(FVector OffsetDirection)
 {
-	//再次按空格,PlayControl回到玩家Pawn,停止操控
-	ALDPlayerController* PC = Cast<ALDPlayerController>(GetController());
-	if (PC)
-	{
-		AddMovementInput(CachedDestination, 1.0, false);
-		PC->OnPlayerSelectChange.Broadcast(EPlayerSelectState::OnSelectNone);
-	}
-}
+	Super::UpdateCursorPosition(OffsetDirection);
+	ViewFollowMesh->AddWorldOffset(FVector(OffsetDirection.X, OffsetDirection.Y, 0));
+};
 
 #pragma endregion

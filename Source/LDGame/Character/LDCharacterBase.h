@@ -23,6 +23,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void PossessedBy(AController* NewController) override;
+	virtual void UnPossessed() override;
 
 	void SetCurrentCursorPosition(const FVector& TargetPos) const;
 	void DragCharacterPosition(const FVector& TargetHandle);
@@ -33,6 +34,7 @@ protected:
 	// Client only.
 	virtual void OnRep_PlayerState() override;
 	virtual void OnZoomValueChanged();
+	virtual void UpdateCursorPosition(FVector OffsetDirection);
 	
 	void InputAbilityInputTagPressed(FGameplayTag InputTag);
 	void InputAbilityInputTagReleased(FGameplayTag InputTag);
