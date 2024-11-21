@@ -5,6 +5,7 @@
 
 #include "EnhancedInputSubsystems.h"
 #include "LDPlayerState.h"
+#include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "Character/AbilitySystem/LDAbilitySystemComponent.h"
 #include "Character/Hero/LDCharacterHero.h"
 #include "Character/Hero/LDCharacterPlayer.h"

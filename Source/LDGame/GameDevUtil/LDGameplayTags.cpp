@@ -15,7 +15,7 @@ namespace LDGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Player_Spin,"InputTag.Player.Spin","Player View Rotation");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Player_Zoom,"InputTag.Player.Zoom","Player View Zoom");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Player_HSelect,"InputTag.Player.HeroSelect","Player Select XiuShi");
-	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Hero_Move,"InputTag.Hero.Move","Hero Move to Target");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Hero_Move,"InputTag.Hero.Move","Hero Move to Target")  ;
 	
 	
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_GA_WhileInputActive, "InputTag.Ability.WhileInput", "GA Hold Input");

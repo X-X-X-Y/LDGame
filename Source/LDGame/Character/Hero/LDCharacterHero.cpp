@@ -15,6 +15,7 @@
 #include "Player/LDPlayerState.h"
 #include "Player/LDTopDownPlayerController.h"
 #include "Player/LDTopDownPlayerState.h"
+#include "Player/AIControl/LDAIHeroController.h"
 
 #pragma region ALDCharacter UEBeh
 
@@ -47,6 +48,21 @@ void ALDCharacterHero::PossessedBy(AController* NewController)
 	}
 	
 	UpdateCharacterViewZoom(0.0f);
+}
+
+void ALDCharacterHero::UnPossessed()
+{
+	Super::UnPossessed();
+
+	// if (AIControllerClass.Get())
+	// {
+	// 	ALDAIHeroController* HeroAIController = Cast<ALDAIHeroController>(AIControllerClass.Get());
+	// 	if (HeroAIController)
+	// 	{
+	// 		HeroAIController->Possess(this);
+	// 		HeroAIController->MoveToLocation(CachedDestination);
+	// 	}
+	// }
 }
 
 void ALDCharacterHero::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -119,5 +135,10 @@ void ALDCharacterHero::UpdateCursorPosition(FVector OffsetDirection)
 	Super::UpdateCursorPosition(OffsetDirection);
 	ViewFollowMesh->AddWorldOffset(FVector(OffsetDirection.X, OffsetDirection.Y, 0));
 };
+
+FVector ALDCharacterHero::GetHeroTargetLocation()
+{
+	return CachedDestination;
+}
 
 #pragma endregion

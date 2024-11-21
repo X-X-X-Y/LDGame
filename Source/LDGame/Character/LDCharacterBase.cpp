@@ -53,20 +53,26 @@ void ALDCharacterBase::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
+	if (!Cast<ALDPlayerController>(NewController))
+	{
+		return;
+	}
+
 	ViewCursorCollision->SetVisibility(true);
 	ViewCursorMesh->SetVisibility(true);
 	ViewCursorCollision->SetCollisionEnabled(ECollisionEnabled::Type::QueryOnly);
 
 	// AbilitySystemComponent
 	ALDPlayerState* PS = Cast<ALDPlayerState>(GetPlayerState());
-	check(PS);
-
-	AbilitySystemComponent = Cast<ULDAbilitySystemComponent>(PS->GetAbilitySystemComponent());
-	AbilitySystemComponent->InitAbilityActorInfo(PS,this);
-
-	if(AbilitySet)
+	if (IsValid(PS))
 	{
-		AbilitySet->GiveToAbilitySystem(AbilitySystemComponent.Get(), nullptr, this);
+		AbilitySystemComponent = Cast<ULDAbilitySystemComponent>(PS->GetAbilitySystemComponent());
+		AbilitySystemComponent->InitAbilityActorInfo(PS,this);
+
+		if(AbilitySet)
+		{
+			AbilitySet->GiveToAbilitySystem(AbilitySystemComponent.Get(), nullptr, this);
+		}
 	}
 }
 

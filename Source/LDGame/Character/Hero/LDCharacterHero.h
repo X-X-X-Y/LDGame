@@ -20,10 +20,13 @@ public:
 
 	ALDCharacterHero();
 
+	FVector GetHeroTargetLocation();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void PossessedBy(AController* NewController) override;
+	virtual void UnPossessed() override;
 
 	void OnInputStarted(const FInputActionValue& InputValue);
 	void OnSetDestinationTriggered(const FInputActionValue& Value);
