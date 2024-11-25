@@ -14,7 +14,8 @@ UENUM(BlueprintType)
 enum class EPlayerSelectState : uint8
 {
 	OnSelectHero,
-	OnSelectNone
+	OnSelectNone,
+	OnSelectBuilding
 };
 
 UCLASS()

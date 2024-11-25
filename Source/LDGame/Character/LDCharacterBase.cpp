@@ -202,7 +202,7 @@ void ALDCharacterBase::UpdateCharacterViewZoom(float ZoomDirection)
 	CameraBoom->TargetArmLength = FMath::Lerp(800, 40000, ZoomCurve->GetFloatValue(ZoomValue));
 	
 	//镜头微量偏转
-	float RotationYValue = FMath::Lerp(-40, -55, ZoomCurve->GetFloatValue(ZoomValue));
+	float RotationYValue = FMath::Lerp(-40, -45, ZoomCurve->GetFloatValue(ZoomValue));
 	FRotator NewRotation = FRotator(RotationYValue, 0.0f, 0.0f);
 	CameraBoom->SetRelativeRotation(NewRotation);
 

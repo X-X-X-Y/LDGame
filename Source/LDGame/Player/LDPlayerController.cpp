@@ -14,6 +14,7 @@
 #include "GameMode/LDTopGameMode.h"
 #include "Input/LDInputComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "LevelActor/LevelInteractable/LDInteractableBuildPlane.h"
 
 ALDPlayerController::ALDPlayerController()
 {
@@ -26,7 +27,6 @@ void ALDPlayerController::BeginPlay()
 	Super::BeginPlay();
 
 	CurrentPlayerPawn = Cast<ALDCharacterPlayer>(GetPawn());
-	OnPlayerSelectChange.AddDynamic(this, &ThisClass::OnPlayerSelectHeroChange);
 
 	//PlayerViewPos
 	if (UWorld* World = GetWorld())
@@ -85,10 +85,6 @@ ULDAbilitySystemComponent* ALDPlayerController::GetLDAbilitySystemComponent() co
 	return CastChecked<ULDAbilitySystemComponent>(PS->GetAbilitySystemComponent());
 }
 
-void ALDPlayerController::OnPlayerSelectHeroChange(EPlayerSelectState NewState)
-{
-}
-
 #pragma endregion
 
 #pragma region PC Input Helper
@@ -103,6 +99,7 @@ void ALDPlayerController::SetPCNativeInput()
 		LDInputComponent->BindNativeAction(PCInputConfig, LDGameplayTags::InputTag_Player_Select, ETriggerEvent::Completed, this, &ThisClass::OnPlayerSelectComplete);
 		LDInputComponent->BindNativeAction(PCInputConfig, LDGameplayTags::InputTag_Player_DMove, ETriggerEvent::Triggered, this, &ThisClass::OnPlayerDragMove);
 		LDInputComponent->BindNativeAction(PCInputConfig, LDGameplayTags::InputTag_Player_HSelect, ETriggerEvent::Started, this, &ThisClass::OnHeroSelect);
+		LDInputComponent->BindNativeAction(PCInputConfig, LDGameplayTags::InputTag_Player_BuildMode, ETriggerEvent::Started, this, &ThisClass::OnBuildModeChange);
 	}
 }
 
@@ -218,10 +215,28 @@ void ALDPlayerController::MoveTracking()
 	FVector CurrentTargetPos;
 	MouseToGroundPlane(CurrentTargetPos, bIsMousePos);
 	CurrentTargetPos += FVector(0, 0, 10);
-
+	
 	ALDCharacterBase* CharacterPawn = GetPawn<ALDCharacterBase>();
 	if (IsValid(CharacterPawn))
 	{
+		if (ALDPlayerState* PS = GetPlayerState<ALDPlayerState>(); IsValid(PS))
+		{
+			if (PS->GetPlayerSelectState() == EPlayerSelectState::OnSelectBuilding)
+			{
+				ALDCharacterPlayer* CharacterPlayer = GetPawn<ALDCharacterPlayer>();
+				if (IsValid(CharacterPlayer))
+				{
+					ALDInteractableBuildPlane* BuildPlane = CharacterPlayer->GetInteractableBuildPlane();
+					if (IsValid(BuildPlane) && BuildPlane != nullptr)
+					{
+						UE_LOG(LogLD, Log, TEXT("Mouse X=%f, Y=%f"),CurrentTargetPos.X,CurrentTargetPos.Y);
+						CurrentTargetPos = BuildPlane->GetBuildPlanPointPosition(CurrentTargetPos);
+						// CurrentTargetPos = BuildPlane->GetBuildPlanPointPosition(CurrentTargetPos);
+					}
+				}
+			}
+		}
+		
 		CharacterPawn->SetCurrentCursorPosition(CurrentTargetPos);
 	}
 }
@@ -272,6 +287,34 @@ void ALDPlayerController::OnHeroSelect(const FInputActionValue& InputValue)
 			UE_LOG(LogLD, Log, TEXT("OnPlayerSelectHero"));
 			break;
 		}
+	}
+}
+
+void ALDPlayerController::OnBuildModeChange(const FInputActionValue& InputValue)
+{
+	ALDPlayerState* PS = GetPlayerState<ALDPlayerState>();
+	if (!IsValid(PS))
+	{
+		return;
+	}
+
+	EPlayerSelectState CurrentPlayerSelectState = PS->GetPlayerSelectState();
+
+	if (CurrentPlayerSelectState== EPlayerSelectState::OnSelectHero)
+	{
+		//选择英雄时不能建造
+		return;
+	}
+
+	if (CurrentPlayerSelectState == EPlayerSelectState::OnSelectBuilding)
+	{
+		//当前是建造状态则退出建造状态
+		PS->SetPlayerSelectState(EPlayerSelectState::OnSelectNone);
+	}
+	else
+	{
+		//当前不是建造状态则进入建造状态
+		PS->SetPlayerSelectState(EPlayerSelectState::OnSelectBuilding);
 	}
 }
 

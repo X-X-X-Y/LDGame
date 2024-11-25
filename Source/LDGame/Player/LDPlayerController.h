@@ -32,9 +32,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "InputSystem|ISAbilitySystemComponent")
 	ULDAbilitySystemComponent* GetLDAbilitySystemComponent() const;
 
-	UFUNCTION(BlueprintCallable, Category = "LDGame")
-	void OnPlayerSelectHeroChange(EPlayerSelectState NewState);
-
 	void MouseToGroundPlane(FVector& Intersection, bool& bIsMouse) const;
 	
 protected:
@@ -54,6 +51,7 @@ protected:
 	void OnPlayerDragMove(const FInputActionValue& InputValue);
 	void OnPlayerHeroSelect(const FInputActionValue& InputValue);
 	void OnHeroSelect(const FInputActionValue& InputValue);
+	void OnBuildModeChange(const FInputActionValue& InputValue);
 	
 
 private:

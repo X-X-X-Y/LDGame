@@ -7,6 +7,7 @@
 #include "Player/LDPlayerState.h"
 #include "LDCharacterPlayer.generated.h"
 
+class ALDInteractableBuildPlane;
 enum class EPlayerSelectState : uint8;
 struct FInputActionValue;
 class UFloatingPawnMovement;
@@ -22,6 +23,8 @@ class LDGAME_API ALDCharacterPlayer : public ALDCharacterBase
 public:
 
 	ALDCharacterPlayer();
+
+	ALDInteractableBuildPlane* GetInteractableBuildPlane() const;
 	
 protected:
 	virtual void BeginPlay() override;
@@ -30,6 +33,11 @@ protected:
 	virtual void OnZoomValueChanged() override;
 	virtual void UpdateCursorPosition(FVector OffsetDirection) override;
 
+	UFUNCTION()
+	void OnPlayerEntryBuildPlane(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepHitResult);
+	UFUNCTION()
+	void OnPlayerExitBuildPlane(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	
 protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LDGame|Zoom")
@@ -40,4 +48,5 @@ protected:
 private:
 	EPlayerSelectState CurrentSelectState = EPlayerSelectState::OnSelectNone;
 	bool bIsLeftMouseButtonDown = false;
+	TWeakObjectPtr<ALDInteractableBuildPlane> BuildPlane;
 };

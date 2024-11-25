@@ -3,9 +3,11 @@
 
 #include "Character/Hero/LDCharacterPlayer.h"
 
+#include "Components/SphereComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
 #include "Input/LDInputComponent.h"
+#include "LevelActor/LevelInteractable/LDInteractableBuildPlane.h"
 #include "Player/LDPlayerState.h"
 
 #pragma region CharacterInterface
@@ -56,12 +58,34 @@ void ALDCharacterPlayer::BeginPlay()
 		GetCharacterMovement()->Deactivate();
 		GetCharacterMovement()->PrimaryComponentTick.bCanEverTick = false;
 	}
+
+	ViewCursorCollision->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnPlayerEntryBuildPlane);
+	ViewCursorCollision->OnComponentEndOverlap.AddDynamic(this, &ThisClass::OnPlayerExitBuildPlane);
 }
 
 #pragma endregion
 
-#pragma region PlayerMovement
+#pragma region BuildPlane
 
+void ALDCharacterPlayer::OnPlayerEntryBuildPlane(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepHitResult)
+{
+	if (Cast<ALDInteractableBuildPlane>(OtherActor))
+	{
+		BuildPlane = Cast<ALDInteractableBuildPlane>(OtherActor);
+	}
+}
 
+void ALDCharacterPlayer::OnPlayerExitBuildPlane(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	BuildPlane.Reset();
+	BuildPlane = nullptr;
+}
+
+ALDInteractableBuildPlane* ALDCharacterPlayer::GetInteractableBuildPlane() const
+{
+	return BuildPlane.Get();
+}
 
 #pragma endregion
