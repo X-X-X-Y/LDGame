@@ -31,7 +31,6 @@ protected:
 	void OnInputStarted(const FInputActionValue& InputValue);
 	void OnSetDestinationTriggered(const FInputActionValue& Value);
 	void OnSetDestinationReleased(const FInputActionValue& Value);
-	virtual void UpdateCursorPosition(FVector OffsetDirection) override;
 
 public:
 	/** Time Threshold to know if it was a short press */

@@ -20,7 +20,7 @@ ALDInteractableBuildPlane::ALDInteractableBuildPlane()
 	
 }
 
-FVector ALDInteractableBuildPlane::GetBuildPlanPointPosition(const FVector& MousePos) const
+FVector ALDInteractableBuildPlane::GetBuildPlanPointPosition(const FVector MousePos) const
 {
 	FVector BuildPlanPoint = FVector::ZeroVector;
 	BuildPlanPoint.Z = BuildPlaneLocation.Z;
@@ -43,7 +43,7 @@ FVector ALDInteractableBuildPlane::GetBuildPlanPointPosition(const FVector& Mous
 		BoxSlotSize * (PosIndex.X - 0.5f * (PosIndex.X < 0 ? -1 : 1)) + BuildPlaneLocation.X,
 		BoxSlotSize * (PosIndex.Y - 0.5f * (PosIndex.Y < 0 ? -1 : 1)) + BuildPlaneLocation.Y,
 		BuildPlaneLocation.Z + BoxSlotSize);
-	UE_LOG(LogLD, Log, TEXT("Current PosIndex X=%f, Y=%f"),PosIndex.X,PosIndex.Y);
+	// UE_LOG(LogLD, Log, TEXT("Current PosIndex X=%f, Y=%f"),PosIndex.X,PosIndex.Y);
 	
 	return BuildPlanPoint;
 } 

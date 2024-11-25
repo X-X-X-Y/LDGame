@@ -31,8 +31,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "InputSystem|ISAbilitySystemComponent")
 	ULDAbilitySystemComponent* GetLDAbilitySystemComponent() const;
-
-	void MouseToGroundPlane(FVector& Intersection, bool& bIsMouse) const;
 	
 protected:
 	//~APlayerControl-Start
@@ -42,22 +40,6 @@ protected:
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void SetupInputComponent() override;
 	//~APlayerControl-End
-
-	void OnPlayerMove(const FInputActionValue& InputValue);
-	void OnPlayerSelect(const FInputActionValue& InputValue);
-	void OnPlayerSelectComplete(const FInputActionValue& InputValue);
-	void OnPlayerSpin(const FInputActionValue& Value);
-	void OnPlayerZoom(const FInputActionValue& InputValue);
-	void OnPlayerDragMove(const FInputActionValue& InputValue);
-	void OnPlayerHeroSelect(const FInputActionValue& InputValue);
-	void OnHeroSelect(const FInputActionValue& InputValue);
-	void OnBuildModeChange(const FInputActionValue& InputValue);
-	
-
-private:
-	void MoveTracking();
-	void SetPCNativeInput();
-	void ResetPCNativeInput();
 	
 public:
 	FLDPlayerSelectChange OnPlayerSelectChange;
@@ -71,8 +53,4 @@ protected:
 	
 private:
 	TSoftObjectPtr<ALDCharacterPlayer> CurrentPlayerPawn;
-	FVector TargetHandle = FVector::ZeroVector;
-	bool bIsMousePos = false;
-	bool bIsLeftMouseButtonDown = false;
-	FTimerHandle MoveTrackingTimerHandle;
 };

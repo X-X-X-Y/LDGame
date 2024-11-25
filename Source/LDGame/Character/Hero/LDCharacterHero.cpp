@@ -5,32 +5,21 @@
 
 #include "EnhancedInputSubsystems.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
-#include "Character/AbilitySystem/LDAbilitySet.h"
-#include "Character/AbilitySystem/LDAbilitySystemComponent.h"
-#include "Components/SphereComponent.h"
 #include "GameDevUtil/LDGameplayTags.h"
-#include "GameFramework/SpringArmComponent.h"
 #include "Input/LDInputComponent.h"
 #include "Player/LDPlayerController.h"
-#include "Player/LDPlayerState.h"
 #include "Player/LDTopDownPlayerController.h"
-#include "Player/LDTopDownPlayerState.h"
-#include "Player/AIControl/LDAIHeroController.h"
 
 #pragma region ALDCharacter UEBeh
 
 ALDCharacterHero::ALDCharacterHero()
 {
 	ViewFollowMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TestMesh"));
-	CameraBoom->SetupAttachment(ViewFollowMesh);
 }
 
 void ALDCharacterHero::BeginPlay()
 {
 	Super::BeginPlay();
-
-	ViewCursorCollision->SetVisibility(false);
-	ViewCursorMesh->SetVisibility(false);
 }
 
 void ALDCharacterHero::PossessedBy(AController* NewController)
@@ -46,23 +35,11 @@ void ALDCharacterHero::PossessedBy(AController* NewController)
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
-	
-	UpdateCharacterViewZoom(0.0f);
 }
 
 void ALDCharacterHero::UnPossessed()
 {
 	Super::UnPossessed();
-
-	// if (AIControllerClass.Get())
-	// {
-	// 	ALDAIHeroController* HeroAIController = Cast<ALDAIHeroController>(AIControllerClass.Get());
-	// 	if (HeroAIController)
-	// 	{
-	// 		HeroAIController->Possess(this);
-	// 		HeroAIController->MoveToLocation(CachedDestination);
-	// 	}
-	// }
 }
 
 void ALDCharacterHero::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -129,12 +106,6 @@ void ALDCharacterHero::OnSetDestinationReleased(const FInputActionValue& Value)
 
 	FollowTime = 0.f;
 }
-
-void ALDCharacterHero::UpdateCursorPosition(FVector OffsetDirection)
-{
-	Super::UpdateCursorPosition(OffsetDirection);
-	ViewFollowMesh->AddWorldOffset(FVector(OffsetDirection.X, OffsetDirection.Y, 0));
-};
 
 FVector ALDCharacterHero::GetHeroTargetLocation()
 {

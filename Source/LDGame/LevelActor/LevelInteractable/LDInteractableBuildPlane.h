@@ -19,7 +19,7 @@ class LDGAME_API ALDInteractableBuildPlane : public ALDInteractableBase
 public:
 	ALDInteractableBuildPlane();
 
-	FVector GetBuildPlanPointPosition(const FVector& MousePos) const;
+	FVector GetBuildPlanPointPosition(const FVector MousePos) const;
 
 protected:
 	virtual void BeginPlay() override;
